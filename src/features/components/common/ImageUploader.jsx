@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 
-const DEFAULT_PROJECT_PLACEHOLDER = "https://via.placeholder.com/600x400?text=No+Image";
-const DEFAULT_AVATAR_PLACEHOLDER = "https://via.placeholder.com/300?text=Avatar";
+const DEFAULT_PROJECT_PLACEHOLDER =
+  "https://via.placeholder.com/600x400?text=No+Image";
+const DEFAULT_AVATAR_PLACEHOLDER =
+  "https://via.placeholder.com/300?text=Avatar";
 
 function validateFile(file, maxSizeMB = 2) {
   const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
@@ -43,12 +45,16 @@ export default function ImageUploader({
     const url = URL.createObjectURL(file);
     img.onload = () => {
       if (img.width < minWidth || img.height < minHeight) {
-        setLocalError(`ابعاد تصویر خیلی کوچک است. حداقل ${minWidth}×${minHeight} پیکسل.`);
+        setLocalError(
+          `ابعاد تصویر خیلی کوچک است. حداقل ${minWidth}×${minHeight} پیکسل.`,
+        );
         URL.revokeObjectURL(url);
         return;
       }
       if (img.width > maxWidth || img.height > maxHeight) {
-        setLocalError(`ابعاد تصویر خیلی بزرگ است. حداکثر ${maxWidth}×${maxHeight} پیکسل.`);
+        setLocalError(
+          `ابعاد تصویر خیلی بزرگ است. حداکثر ${maxWidth}×${maxHeight} پیکسل.`,
+        );
         URL.revokeObjectURL(url);
         return;
       }
@@ -79,11 +85,28 @@ export default function ImageUploader({
   return (
     <div className="field">
       {label ? (
-        <label htmlFor={id} style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: "#3d4664", marginBottom: 5 }}>
-          {label} {required ? <span style={{ color: "var(--red)" }}>*</span> : null}
+        <label
+          htmlFor={id}
+          style={{
+            display: "block",
+            fontSize: 12.5,
+            fontWeight: 700,
+            color: "#3d4664",
+            marginBottom: 5,
+          }}
+        >
+          {label}{" "}
+          {required ? <span style={{ color: "var(--red)" }}>*</span> : null}
         </label>
       ) : null}
-      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <div
           style={{
             width: 90,
@@ -105,7 +128,14 @@ export default function ImageUploader({
           />
         </div>
         <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
-          <input name="no_autofill_random" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+          <input
+            name="no_autofill_random"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
             id={id}
             ref={inputRef}
             type="file"
@@ -113,16 +143,25 @@ export default function ImageUploader({
             onChange={handleFile}
             style={{ display: "none" }}
           />
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => inputRef.current?.click()}>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => inputRef.current?.click()}
+          >
             انتخاب تصویر
           </button>
           {value ? (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={clear}>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={clear}
+            >
               حذف تصویر
             </button>
           ) : null}
           <span style={{ fontSize: 11, color: "var(--muted)" }}>
-            حداکثر {maxSizeMB}MB — {minWidth}×{minHeight} تا {maxWidth}×{maxHeight}
+            حداکثر {maxSizeMB}MB — {minWidth}×{minHeight} تا {maxWidth}×
+            {maxHeight}
           </span>
         </div>
       </div>

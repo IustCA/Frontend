@@ -4,20 +4,34 @@ import Field from "../common/Field";
 import PersianDatePicker from "../common/PersianDatePicker";
 
 function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
-  const toEn = (s) => String(s || "").replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)]);
+  const toEn = (s) =>
+    String(s || "").replace(
+      /[۰-۹]/g,
+      (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)],
+    );
   const handlePhoneChange = (e) => {
     let v = toEn(e.target.value).replace(/\D/g, "");
     if (v.length > 11) v = v.slice(0, 11);
     updatePersonal("phone", v);
   };
   const handlePhoneKeyDown = (e) => {
-    const allowed = ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End"];
-    if (allowed.includes(e.key) || (e.ctrlKey || e.metaKey)) return;
+    const allowed = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "End",
+    ];
+    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
     if (!/^\d$/.test(e.key)) e.preventDefault();
   };
   const handlePhonePaste = (e) => {
     e.preventDefault();
-    let v = toEn(e.clipboardData.getData("text")).replace(/\D/g, "").slice(0, 11);
+    let v = toEn(e.clipboardData.getData("text"))
+      .replace(/\D/g, "")
+      .slice(0, 11);
     updatePersonal("phone", v);
   };
   return (
@@ -54,12 +68,25 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
               maxLength={11}
               dir="ltr"
             />
-            <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}> فقط عدد، ۱۱ رقم با 09 شروع شود</div>
+            <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
+              {" "}
+              فقط عدد، ۱۱ رقم با 09 شروع شود
+            </div>
           </Field>
-          <Field id="pi-linkedin" label="لینکدین" error={personalErrors.linkedin}>
-            <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+          <Field
+            id="pi-linkedin"
+            label="لینکدین"
+            error={personalErrors.linkedin}
+          >
+            <input
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
               autoComplete="off"
-              name="pi-linkedin_no_autofill" id="pi-linkedin"
+              name="pi-linkedin_no_autofill"
+              id="pi-linkedin"
               dir="ltr"
               className={"input" + (personalErrors.linkedin ? " err" : "")}
               value={p.linkedin}
@@ -69,9 +96,15 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
             />
           </Field>
           <Field id="pi-github" label="گیت‌هاب" error={personalErrors.github}>
-            <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+            <input
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
               autoComplete="off"
-              name="pi-github_no_autofill" id="pi-github"
+              name="pi-github_no_autofill"
+              id="pi-github"
               dir="ltr"
               className={"input" + (personalErrors.github ? " err" : "")}
               value={p.github}
@@ -80,10 +113,20 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
               placeholder="https://github.com/..."
             />
           </Field>
-          <Field id="pi-web" label="وب‌سایت شخصی" error={personalErrors.website}>
-            <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+          <Field
+            id="pi-web"
+            label="وب‌سایت شخصی"
+            error={personalErrors.website}
+          >
+            <input
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
               autoComplete="off"
-              name="pi-web_no_autofill" id="pi-web"
+              name="pi-web_no_autofill"
+              id="pi-web"
               dir="ltr"
               className={"input" + (personalErrors.website ? " err" : "")}
               value={p.website}

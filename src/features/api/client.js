@@ -4,7 +4,8 @@ export const authApi = {
   register: (payload) => api.post("/api/accounts/auth/register/", payload),
   login: (username, password) =>
     api.post("/api/accounts/auth/login/", { username, password }),
-  refreshToken: (refresh) => api.post("/api/accounts/auth/refresh/", { refresh }),
+  refreshToken: (refresh) =>
+    api.post("/api/accounts/auth/refresh/", { refresh }),
   getMe: () => api.get("/api/accounts/auth/me/"),
 };
 
@@ -41,7 +42,8 @@ export const itemsApi = {
   createLanguage: (data) => api.post("/api/accounts/languages/", data),
   deleteLanguage: (id) => api.delete(`/api/accounts/languages/${id}/`),
 
-  getCertificates: (params) => api.get("/api/accounts/certificates/", { params }),
+  getCertificates: (params) =>
+    api.get("/api/accounts/certificates/", { params }),
   createCertificate: (data) => api.post("/api/accounts/certificates/", data),
   updateCertificate: (id, data) =>
     api.patch(`/api/accounts/certificates/${id}/`, data),
@@ -53,7 +55,8 @@ export const itemsApi = {
     api.patch(`/api/accounts/activities/${id}/`, data),
   deleteActivity: (id) => api.delete(`/api/accounts/activities/${id}/`),
 
-  getAchievements: (params) => api.get("/api/accounts/achievements/", { params }),
+  getAchievements: (params) =>
+    api.get("/api/accounts/achievements/", { params }),
   createAchievement: (data) => api.post("/api/accounts/achievements/", data),
   updateAchievement: (id, data) =>
     api.patch(`/api/accounts/achievements/${id}/`, data),

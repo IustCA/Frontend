@@ -49,12 +49,24 @@ export default function Header({
     const allowed = ["image/jpeg", "image/png", "image/webp"];
     if (!allowed.includes(file.type)) {
       setAvatarErr("فرمت باید JPG/PNG/WEBP باشد");
-      dispatch(showToast(toastTimer, "فرمت تصویر باید JPG، PNG یا WEBP باشد.", "error"));
+      dispatch(
+        showToast(
+          toastTimer,
+          "فرمت تصویر باید JPG، PNG یا WEBP باشد.",
+          "error",
+        ),
+      );
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
       setAvatarErr("حجم حداکثر ۲MB");
-      dispatch(showToast(toastTimer, "حجم تصویر نباید بیشتر از ۲ مگابایت باشد.", "error"));
+      dispatch(
+        showToast(
+          toastTimer,
+          "حجم تصویر نباید بیشتر از ۲ مگابایت باشد.",
+          "error",
+        ),
+      );
       return;
     }
     const img = new Image();
@@ -62,7 +74,13 @@ export default function Header({
     img.onload = () => {
       if (img.width < 200 || img.height < 200) {
         setAvatarErr("حداقل ۲۰۰×۲۰۰");
-        dispatch(showToast(toastTimer, "ابعاد تصویر خیلی کوچک است. حداقل ۲۰۰×۲۰۰ پیکسل.", "error"));
+        dispatch(
+          showToast(
+            toastTimer,
+            "ابعاد تصویر خیلی کوچک است. حداقل ۲۰۰×۲۰۰ پیکسل.",
+            "error",
+          ),
+        );
         URL.revokeObjectURL(url);
         return;
       }
@@ -124,19 +142,54 @@ export default function Header({
             />
           </div>
           {editMode ? (
-            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
-              <input name="no_autofill_random" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" ref={avatarRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatar} style={{ display: "none" }} />
-              <button type="button" className="btn btn-outline btn-sm" onClick={() => avatarRef.current?.click()}>
+            <div
+              style={{
+                marginTop: 8,
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                alignItems: "center",
+              }}
+            >
+              <input
+                name="no_autofill_random"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-form-type="other"
+                ref={avatarRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleAvatar}
+                style={{ display: "none" }}
+              />
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => avatarRef.current?.click()}
+              >
                 <Icon name="user" size={13} />
                 تغییر تصویر
               </button>
               {p.avatar ? (
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => updatePersonal("avatar", "")}>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => updatePersonal("avatar", "")}
+                >
                   حذف تصویر
                 </button>
               ) : null}
-              {avatarErr ? <span style={{ fontSize: 11, color: "var(--red)" }}>{avatarErr}</span> : null}
-              <span style={{ fontSize: 10, color: "var(--muted)" }}>حداکثر ۲MB — ۲۰۰×۲۰۰ تا ۳۰۰۰×۳۰۰۰</span>
+              {avatarErr ? (
+                <span style={{ fontSize: 11, color: "var(--red)" }}>
+                  {avatarErr}
+                </span>
+              ) : null}
+              <span style={{ fontSize: 10, color: "var(--muted)" }}>
+                حداکثر ۲MB — ۲۰۰×۲۰۰ تا ۳۰۰۰×۳۰۰۰
+              </span>
             </div>
           ) : null}
         </div>
@@ -151,9 +204,15 @@ export default function Header({
                   required
                   error={personalErrors.fullName}
                 >
-                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
                     autoComplete="off"
-                    name="hd-name_no_autofill" id="hd-name"
+                    name="hd-name_no_autofill"
+                    id="hd-name"
                     className={
                       "input" + (personalErrors.fullName ? " err" : "")
                     }
@@ -169,9 +228,15 @@ export default function Header({
                   required
                   error={personalErrors.title}
                 >
-                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
                     autoComplete="off"
-                    name="hd-title_no_autofill" id="hd-title"
+                    name="hd-title_no_autofill"
+                    id="hd-title"
                     className={"input" + (personalErrors.title ? " err" : "")}
                     value={p.title}
                     onChange={(e) => updatePersonal("title", e.target.value)}
@@ -181,11 +246,23 @@ export default function Header({
                 </Field>
               </div>
               <div className="grid-2">
-                <Field id="hd-uni" label="دانشگاه" error={personalErrors.university}>
-                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                <Field
+                  id="hd-uni"
+                  label="دانشگاه"
+                  error={personalErrors.university}
+                >
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
                     autoComplete="off"
-                    name="hd-uni_no_autofill" id="hd-uni"
-                    className={"input" + (personalErrors.university ? " err" : "")}
+                    name="hd-uni_no_autofill"
+                    id="hd-uni"
+                    className={
+                      "input" + (personalErrors.university ? " err" : "")
+                    }
                     value={p.university}
                     onChange={(e) =>
                       updatePersonal("university", e.target.value)
@@ -193,10 +270,20 @@ export default function Header({
                     maxLength={80}
                   />
                 </Field>
-                <Field id="hd-field" label="رشتهٔ تحصیلی" error={personalErrors.field}>
-                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                <Field
+                  id="hd-field"
+                  label="رشتهٔ تحصیلی"
+                  error={personalErrors.field}
+                >
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
                     autoComplete="off"
-                    name="hd-field_no_autofill" id="hd-field"
+                    name="hd-field_no_autofill"
+                    id="hd-field"
                     className={"input" + (personalErrors.field ? " err" : "")}
                     value={p.field}
                     onChange={(e) => updatePersonal("field", e.target.value)}
@@ -205,21 +292,43 @@ export default function Header({
                 </Field>
               </div>
               <div className="grid-2">
-                <Field id="hd-sem" label="ترم تحصیلی" error={personalErrors.semester}>
-                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                <Field
+                  id="hd-sem"
+                  label="ترم تحصیلی"
+                  error={personalErrors.semester}
+                >
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
                     autoComplete="off"
-                    name="hd-sem_no_autofill" id="hd-sem"
-                    className={"input" + (personalErrors.semester ? " err" : "")}
+                    name="hd-sem_no_autofill"
+                    id="hd-sem"
+                    className={
+                      "input" + (personalErrors.semester ? " err" : "")
+                    }
                     value={p.semester}
                     onChange={(e) => updatePersonal("semester", e.target.value)}
                     maxLength={20}
                     placeholder="مثلاً ترم ۶"
                   />
                 </Field>
-                <Field id="hd-city" label="شهر محل سکونت" error={personalErrors.city}>
-                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                <Field
+                  id="hd-city"
+                  label="شهر محل سکونت"
+                  error={personalErrors.city}
+                >
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
                     autoComplete="off"
-                    name="hd-city_no_autofill" id="hd-city"
+                    name="hd-city_no_autofill"
+                    id="hd-city"
                     className={"input" + (personalErrors.city ? " err" : "")}
                     value={p.city}
                     onChange={(e) => updatePersonal("city", e.target.value)}
@@ -228,7 +337,12 @@ export default function Header({
                 </Field>
               </div>
               <Field id="hd-avail" label="وضعیت همکاری">
-                <select autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                <select
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
                   autoComplete="off"
                   id="hd-avail"
                   className="input"

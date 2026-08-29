@@ -60,18 +60,41 @@ export default function Profile({ toastTimer }) {
   const [contactOpen, setContactOpen] = useState(false);
   const backupRef = useRef(null);
 
-  const updatePersonal = useCallback((key, value) => setProfile((prev) => ({ ...prev, personal: { ...prev.personal, [key]: value } })), []);
-  const handleUsernameChanged = useCallback((newUsername) => {
-    setProfile((prev) => (prev ? { ...prev, personal: { ...prev.personal, username: newUsername } } : prev));
-    if (backupRef.current?.personal) backupRef.current = { ...backupRef.current, personal: { ...backupRef.current.personal, username: newUsername } };
-    queryClient.setQueryData(["fetch_profile_data"], (old) => (old ? { ...old, personal: { ...old.personal, username: newUsername } } : old));
-    queryClient.setQueryData(["fetch_user_info"], (old) => {
-      if (!old) return old;
-      if (old.user) return { ...old, user: { ...old.user, username: newUsername } };
-      if (old.username) return { ...old, username: newUsername };
-      return old;
-    });
-  }, [queryClient]);
+  const updatePersonal = useCallback(
+    (key, value) =>
+      setProfile((prev) => ({
+        ...prev,
+        personal: { ...prev.personal, [key]: value },
+      })),
+    [],
+  );
+  const handleUsernameChanged = useCallback(
+    (newUsername) => {
+      setProfile((prev) =>
+        prev
+          ? { ...prev, personal: { ...prev.personal, username: newUsername } }
+          : prev,
+      );
+      if (backupRef.current?.personal)
+        backupRef.current = {
+          ...backupRef.current,
+          personal: { ...backupRef.current.personal, username: newUsername },
+        };
+      queryClient.setQueryData(["fetch_profile_data"], (old) =>
+        old
+          ? { ...old, personal: { ...old.personal, username: newUsername } }
+          : old,
+      );
+      queryClient.setQueryData(["fetch_user_info"], (old) => {
+        if (!old) return old;
+        if (old.user)
+          return { ...old, user: { ...old.user, username: newUsername } };
+        if (old.username) return { ...old, username: newUsername };
+        return old;
+      });
+    },
+    [queryClient],
+  );
 
   const saveItem = async (section, id, data) => {
     const endpoint = SECTION_ENDPOINT[section] || section;
@@ -187,22 +210,41 @@ export default function Profile({ toastTimer }) {
     else if (pr.fullName.trim().length > 60) e.fullName = "حداکثر ۶۰ کاراکتر۔";
     if (!pr.title.trim()) e.title = "عنوان حرفه‌ای الزامی است۔";
     else if (pr.title.length > 80) e.title = "حداکثر ۸۰ کاراکتر۔";
-    if (pr.university && pr.university.length > 80) e.university = "حداکثر ۸۰ کاراکتر۔";
+    if (pr.university && pr.university.length > 80)
+      e.university = "حداکثر ۸۰ کاراکتر۔";
     if (pr.field && pr.field.length > 80) e.field = "حداکثر ۸۰ کاراکتر۔";
-    if (pr.semester && pr.semester.length > 20) e.semester = "حداکثر ۲۰ کاراکتر۔";
+    if (pr.semester && pr.semester.length > 20)
+      e.semester = "حداکثر ۲۰ کاراکتر۔";
     if (pr.city && pr.city.length > 50) e.city = "حداکثر ۵۰ کاراکتر۔";
     const normalizeFa = (s) => toEnglishDigits(String(s || "").trim());
-    if (pr.birthDate && !/^\d{4}\/\d{1,2}(\/\d{1,2})?$/.test(normalizeFa(pr.birthDate))) e.birthDate = "فرمت تاریخ باید YYYY/MM/DD یا YYYY/MM باشد۔";
+    if (
+      pr.birthDate &&
+      !/^\d{4}\/\d{1,2}(\/\d{1,2})?$/.test(normalizeFa(pr.birthDate))
+    )
+      e.birthDate = "فرمت تاریخ باید YYYY/MM/DD یا YYYY/MM باشد۔";
     else if (pr.birthDate) {
       try {
-        const fmt = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric", month: "numeric", day: "numeric" });
+        const fmt = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+        });
         const parts = fmt.formatToParts(new Date());
-        const jy = Number(toEnglishDigits(parts.find((p) => p.type === "year")?.value || "0"));
-        const jm = Number(toEnglishDigits(parts.find((p) => p.type === "month")?.value || "0"));
-        const jd = Number(toEnglishDigits(parts.find((p) => p.type === "day")?.value || "0"));
+        const jy = Number(
+          toEnglishDigits(parts.find((p) => p.type === "year")?.value || "0"),
+        );
+        const jm = Number(
+          toEnglishDigits(parts.find((p) => p.type === "month")?.value || "0"),
+        );
+        const jd = Number(
+          toEnglishDigits(parts.find((p) => p.type === "day")?.value || "0"),
+        );
         const v = normalizeFa(pr.birthDate).split("/");
-        const y = Number(v[0]), m = Number(v[1] || 1), d = Number(v[2] || 1);
-        const isFuture = y > jy || (y === jy && m > jm) || (y === jy && m === jm && d > jd);
+        const y = Number(v[0]),
+          m = Number(v[1] || 1),
+          d = Number(v[2] || 1);
+        const isFuture =
+          y > jy || (y === jy && m > jm) || (y === jy && m === jm && d > jd);
         if (isFuture) e.birthDate = "تاریخ تولد نمی‌تواند بعد از امروز باشد۔";
       } catch (err) {
         void err;
@@ -210,14 +252,21 @@ export default function Profile({ toastTimer }) {
     }
     if (pr.phone) {
       const phoneDigits = normalizeFa(pr.phone).replace(/\D/g, "");
-      if (!/^09\d{9}$/.test(phoneDigits)) e.phone = "شماره تماس باید ۱۱ رقم و با 09 شروع شود (مثال: 09123456789)۔";
+      if (!/^09\d{9}$/.test(phoneDigits))
+        e.phone =
+          "شماره تماس باید ۱۱ رقم و با 09 شروع شود (مثال: 09123456789)۔";
     }
-    if (pr.linkedin && pr.linkedin.length > 255) e.linkedin = "حداکثر ۲۵۵ کاراکتر۔";
-    else if (pr.linkedin && !urlRe.test(pr.linkedin)) e.linkedin = "لینک باید با http:// یا https:// شروع شود۔";
+    if (pr.linkedin && pr.linkedin.length > 255)
+      e.linkedin = "حداکثر ۲۵۵ کاراکتر۔";
+    else if (pr.linkedin && !urlRe.test(pr.linkedin))
+      e.linkedin = "لینک باید با http:// یا https:// شروع شود۔";
     if (pr.github && pr.github.length > 255) e.github = "حداکثر ۲۵۵ کاراکتر۔";
-    else if (pr.github && !urlRe.test(pr.github)) e.github = "لینک باید با http:// یا https:// شروع شود۔";
-    if (pr.website && pr.website.length > 255) e.website = "حداکثر ۲۵۵ کاراکتر۔";
-    else if (pr.website && !urlRe.test(pr.website)) e.website = "لینک باید با http:// یا https:// شروع شود۔";
+    else if (pr.github && !urlRe.test(pr.github))
+      e.github = "لینک باید با http:// یا https:// شروع شود۔";
+    if (pr.website && pr.website.length > 255)
+      e.website = "حداکثر ۲۵۵ کاراکتر۔";
+    else if (pr.website && !urlRe.test(pr.website))
+      e.website = "لینک باید با http:// یا https:// شروع شود۔";
     if (pr.about && pr.about.length > 1000) e.about = "حداکثر ۱۰۰۰ کاراکتر۔";
     setPersonalErrors(e);
     if (Object.keys(e).length) {
@@ -315,7 +364,13 @@ export default function Profile({ toastTimer }) {
             personalErrors={personalErrors}
             toastTimer={toastTimer}
           />
-          {editMode ? <AccountSettings p={p} toastTimer={toastTimer} onUsernameChanged={handleUsernameChanged} /> : null}
+          {editMode ? (
+            <AccountSettings
+              p={p}
+              toastTimer={toastTimer}
+              onUsernameChanged={handleUsernameChanged}
+            />
+          ) : null}
           <Languages
             profile={profile}
             isFormOpen={isFormOpen}

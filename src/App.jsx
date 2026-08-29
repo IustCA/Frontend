@@ -12,7 +12,14 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route index element={<Login toastTimer={toastTimer} />} />
-          <Route path="profile" element={<RestrictedArea toastTimer={toastTimer}><Profile toastTimer={toastTimer} /></RestrictedArea>} />
+          <Route
+            path="profile"
+            element={
+              <RestrictedArea toastTimer={toastTimer}>
+                <Profile toastTimer={toastTimer} />
+              </RestrictedArea>
+            }
+          />
         </Routes>
       </BrowserRouter>
       <Toast />

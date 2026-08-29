@@ -123,7 +123,8 @@ export default function ContactModal({
             </button>
           </div>
         ) : (
-          <form autoComplete="off"
+          <form
+            autoComplete="off"
             onSubmit={(e) => {
               e.preventDefault();
               submit();
@@ -132,9 +133,16 @@ export default function ContactModal({
           >
             <div className="grid-2">
               <Field id="ct-name" label="نام" required error={errs.name}>
-                <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
+                <input
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  autoComplete="off"
                   ref={firstRef}
-                  name="ct-name_no_autofill" id="ct-name"
+                  name="ct-name_no_autofill"
+                  id="ct-name"
                   className={"input" + (errs.name ? " err" : "")}
                   value={f.name}
                   placeholder="نام شما"
@@ -142,8 +150,15 @@ export default function ContactModal({
                 />
               </Field>
               <Field id="ct-email" label="ایمیل" required error={errs.email}>
-                <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
-                  name="ct-email_no_autofill" id="ct-email"
+                <input
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  autoComplete="off"
+                  name="ct-email_no_autofill"
+                  id="ct-email"
                   dir="ltr"
                   type="email"
                   className={"input" + (errs.email ? " err" : "")}
@@ -154,8 +169,15 @@ export default function ContactModal({
               </Field>
             </div>
             <Field id="ct-subject" label="موضوع" required error={errs.subject}>
-              <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
-                name="ct-subject_no_autofill" id="ct-subject"
+              <input
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-form-type="other"
+                autoComplete="off"
+                name="ct-subject_no_autofill"
+                id="ct-subject"
                 className={"input" + (errs.subject ? " err" : "")}
                 value={f.subject}
                 placeholder="مثلاً پیشنهاد همکاری"
@@ -163,8 +185,15 @@ export default function ContactModal({
               />
             </Field>
             <Field id="ct-msg" label="متن پیام" required error={errs.message}>
-              <textarea autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
-                name="ct-msg_no_autofill" id="ct-msg"
+              <textarea
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-form-type="other"
+                autoComplete="off"
+                name="ct-msg_no_autofill"
+                id="ct-msg"
                 className={"input" + (errs.message ? " err" : "")}
                 value={f.message}
                 placeholder="پیام خود را بنویسید..."

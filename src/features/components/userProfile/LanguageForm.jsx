@@ -28,10 +28,33 @@ export default function LanguageForm({ initial, onSave, onCancel }) {
   return (
     <div className="form-box no-print">
       <Field id="lang-name" label="نام زبان" required error={err}>
-        <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off" name="lang-name_no_autofill" id="lang-name" className={"input" + (err ? " err" : "")} value={f.name} placeholder="مثلاً انگلیسی" onChange={(e) => { setF({ ...f, name: e.target.value }); setErr(""); }} maxLength={50} />
+        <input
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          autoComplete="off"
+          name="lang-name_no_autofill"
+          id="lang-name"
+          className={"input" + (err ? " err" : "")}
+          value={f.name}
+          placeholder="مثلاً انگلیسی"
+          onChange={(e) => {
+            setF({ ...f, name: e.target.value });
+            setErr("");
+          }}
+          maxLength={50}
+        />
       </Field>
       <Field id="lang-level" label="سطح تسلط">
-        <select autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
+        <select
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          autoComplete="off"
           id="lang-level"
           className="input"
           value={f.level}

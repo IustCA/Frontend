@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { PERSIAN_MONTHS, toPersianDigits, parseValue, getTodayJalali } from "./dateUtils";
+import {
+  PERSIAN_MONTHS,
+  toPersianDigits,
+  parseValue,
+  getTodayJalali,
+} from "./dateUtils";
 
 const YEARS = Array.from({ length: 81 }, (_, i) => String(1410 - i));
-const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+const DAYS = Array.from({ length: 31 }, (_, i) =>
+  String(i + 1).padStart(2, "0"),
+);
 
 export default function PersianDatePicker({
   id,
@@ -71,7 +78,8 @@ export default function PersianDatePicker({
     }
     if (minParsed?.year && minParsed?.month && year) {
       const y = Number(year);
-      const minY = Number(minParsed.year), minM = Number(minParsed.month);
+      const minY = Number(minParsed.year),
+        minM = Number(minParsed.month);
       if (y === minY && m < minM) return true;
       if (y < minY) return true;
     }
@@ -80,14 +88,17 @@ export default function PersianDatePicker({
   const isDayDisabled = (dVal) => {
     const d = Number(dVal);
     if (!year || !month) return false;
-    const y = Number(year), m = Number(month);
+    const y = Number(year),
+      m = Number(month);
     if (maxToday) {
       if (y > today.jy) return true;
       if (y === today.jy && m > today.jm) return true;
       if (y === today.jy && m === today.jm && d > today.jd) return true;
     }
     if (minParsed?.year) {
-      const minY = Number(minParsed.year), minM = Number(minParsed.month), minD = Number(minParsed.day || 1);
+      const minY = Number(minParsed.year),
+        minM = Number(minParsed.month),
+        minD = Number(minParsed.day || 1);
       if (y < minY) return true;
       if (y === minY && m < minM) return true;
       if (y === minY && m === minM && d < minD) return true;
@@ -98,12 +109,39 @@ export default function PersianDatePicker({
   return (
     <div className="field">
       {label ? (
-        <label htmlFor={id} style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: "#3d4664", marginBottom: 5 }}>
-          {label} {required ? <span style={{ color: "var(--red)" }}>*</span> : null}
+        <label
+          htmlFor={id}
+          style={{
+            display: "block",
+            fontSize: 12.5,
+            fontWeight: 700,
+            color: "#3d4664",
+            marginBottom: 5,
+          }}
+        >
+          {label}{" "}
+          {required ? <span style={{ color: "var(--red)" }}>*</span> : null}
         </label>
       ) : null}
-      <div style={{ display: "grid", gridTemplateColumns: mode === "full" ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
-        <select autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" id={`${id}-year`} className={`input${error ? " err" : ""}`} value={year} onChange={handleYear}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: mode === "full" ? "1fr 1fr 1fr" : "1fr 1fr",
+          gap: 8,
+        }}
+      >
+        <select
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          id={`${id}-year`}
+          className={`input${error ? " err" : ""}`}
+          value={year}
+          onChange={handleYear}
+        >
           <option value="">سال</option>
           {years.map((y) => (
             <option key={y} value={y} disabled={isYearDisabled(y)}>
@@ -111,7 +149,18 @@ export default function PersianDatePicker({
             </option>
           ))}
         </select>
-        <select autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" id={`${id}-month`} className={`input${error ? " err" : ""}`} value={month} onChange={handleMonth}>
+        <select
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          id={`${id}-month`}
+          className={`input${error ? " err" : ""}`}
+          value={month}
+          onChange={handleMonth}
+        >
           <option value="">ماه</option>
           {PERSIAN_MONTHS.map((m, idx) => {
             const val = String(idx + 1).padStart(2, "0");
@@ -123,7 +172,18 @@ export default function PersianDatePicker({
           })}
         </select>
         {mode === "full" ? (
-          <select autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" id={`${id}-day`} className={`input${error ? " err" : ""}`} value={day} onChange={handleDay}>
+          <select
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
+            id={`${id}-day`}
+            className={`input${error ? " err" : ""}`}
+            value={day}
+            onChange={handleDay}
+          >
             <option value="">روز</option>
             {days.map((d) => (
               <option key={d} value={d} disabled={isDayDisabled(d)}>

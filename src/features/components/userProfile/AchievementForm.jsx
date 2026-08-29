@@ -32,7 +32,10 @@ export default function AchievementForm({ initial, onSave, onCancel }) {
       setErr("حداکثر ۲۵۵ کاراکتر۔");
       return;
     }
-    const nf = (s) => String(s || "").trim().replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)]);
+    const nf = (s) =>
+      String(s || "")
+        .trim()
+        .replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)]);
     if (f.date && !/^\d{4}\/\d{1,2}$/.test(nf(f.date))) {
       setErrDate("فرمت باید YYYY/MM باشد۔");
       return;
@@ -51,11 +54,39 @@ export default function AchievementForm({ initial, onSave, onCancel }) {
   return (
     <div className="form-box no-print">
       <Field id="ah-title" label="عنوان دستاورد" required error={err}>
-        <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off" name="ah-title_no_autofill" id="ah-title" className={"input" + (err ? " err" : "")} value={f.title} placeholder="مثلاً رتبهٔ اول هکاتون" onChange={(e) => { setF({ ...f, title: e.target.value }); setErr(""); }} maxLength={255} />
+        <input
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          autoComplete="off"
+          name="ah-title_no_autofill"
+          id="ah-title"
+          className={"input" + (err ? " err" : "")}
+          value={f.title}
+          placeholder="مثلاً رتبهٔ اول هکاتون"
+          onChange={(e) => {
+            setF({ ...f, title: e.target.value });
+            setErr("");
+          }}
+          maxLength={255}
+        />
       </Field>
       <div className="grid-2">
         <Field id="ah-type" label="نوع دستاورد">
-          <select autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off" id="ah-type" className="input" value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}>
+          <select
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
+            autoComplete="off"
+            id="ah-type"
+            className="input"
+            value={f.type}
+            onChange={(e) => setF({ ...f, type: e.target.value })}
+          >
             {ACHIEVEMENT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -63,10 +94,31 @@ export default function AchievementForm({ initial, onSave, onCancel }) {
             ))}
           </select>
         </Field>
-        <PersianDatePicker id="ah-date" label="تاریخ" error={errDate} value={f.date} onChange={(v) => setF({ ...f, date: v })} mode="monthYear" maxToday />
+        <PersianDatePicker
+          id="ah-date"
+          label="تاریخ"
+          error={errDate}
+          value={f.date}
+          onChange={(v) => setF({ ...f, date: v })}
+          mode="monthYear"
+          maxToday
+        />
       </div>
       <Field id="ah-desc" label="توضیحات" error={errDesc}>
-        <textarea autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off" name="ah-desc_no_autofill" id="ah-desc" className={"input" + (errDesc ? " err" : "")} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} maxLength={500} />
+        <textarea
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          autoComplete="off"
+          name="ah-desc_no_autofill"
+          id="ah-desc"
+          className={"input" + (errDesc ? " err" : "")}
+          value={f.description}
+          onChange={(e) => setF({ ...f, description: e.target.value })}
+          maxLength={500}
+        />
       </Field>
       <FormActions onSave={submit} onCancel={onCancel} />
     </div>

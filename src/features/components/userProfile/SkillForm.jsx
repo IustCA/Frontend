@@ -35,11 +35,34 @@ export default function SkillForm({
   return (
     <div className="form-box no-print">
       <Field id="skill-name" label="نام مهارت" required error={err}>
-        <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off" name="skill-name_no_autofill" id="skill-name" className={"input" + (err ? " err" : "")} value={f.name} placeholder="مثلاً React" onChange={(e) => { setF({ ...f, name: e.target.value }); setErr(""); }} maxLength={80} />
+        <input
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          autoComplete="off"
+          name="skill-name_no_autofill"
+          id="skill-name"
+          className={"input" + (err ? " err" : "")}
+          value={f.name}
+          placeholder="مثلاً React"
+          onChange={(e) => {
+            setF({ ...f, name: e.target.value });
+            setErr("");
+          }}
+          maxLength={80}
+        />
       </Field>
       <div className="grid-2">
         <Field id="skill-level" label="سطح مهارت">
-          <select autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
+          <select
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
+            autoComplete="off"
             id="skill-level"
             className="input"
             value={f.level}
@@ -53,7 +76,13 @@ export default function SkillForm({
           </select>
         </Field>
         <Field id="skill-cat" label="دسته‌بندی">
-          <select autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
+          <select
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
+            autoComplete="off"
             id="skill-cat"
             className="input"
             value={f.category}
