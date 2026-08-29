@@ -17,29 +17,29 @@ export default function SkillForm({
   );
   const [err, setErr] = useState("");
   const submit = () => {
-    if (!f.name.trim()) {
+    const name = f.name.trim();
+    if (!name) {
       setErr("نام مهارت الزامی است۔");
       return;
     }
-    onSave({ ...f, name: f.name.trim() });
+    if (name.length > 80) {
+      setErr("حداکثر ۸۰ کاراکتر۔");
+      return;
+    }
+    if (name.length < 2) {
+      setErr("حداقل ۲ کاراکتر۔");
+      return;
+    }
+    onSave({ ...f, name });
   };
   return (
     <div className="form-box no-print">
       <Field id="skill-name" label="نام مهارت" required error={err}>
-        <input
-          id="skill-name"
-          className={"input" + (err ? " err" : "")}
-          value={f.name}
-          placeholder="مثلاً React"
-          onChange={(e) => {
-            setF({ ...f, name: e.target.value });
-            setErr("");
-          }}
-        />
+        <input autoComplete="off" id="skill-name" className={"input" + (err ? " err" : "")} value={f.name} placeholder="مثلاً React" onChange={(e) => { setF({ ...f, name: e.target.value }); setErr(""); }} maxLength={80} />
       </Field>
       <div className="grid-2">
         <Field id="skill-level" label="سطح مهارت">
-          <select
+          <select autoComplete="off"
             id="skill-level"
             className="input"
             value={f.level}
@@ -53,7 +53,7 @@ export default function SkillForm({
           </select>
         </Field>
         <Field id="skill-cat" label="دسته‌بندی">
-          <select
+          <select autoComplete="off"
             id="skill-cat"
             className="input"
             value={f.category}

@@ -1,0 +1,28 @@
+import { useQuery } from "react-query";
+import api from "../api/axios";
+import { useDispatch } from "react-redux";
+import { showToast } from "../shared/AppSlice";
+
+export function useProfileData(toastTimer) {
+  const dispatch = useDispatch();
+
+  return useQuery({
+    queryKey: ["fetch_profile_data"],
+    queryFn: async () => {
+      try {
+        const response = await api.get("/api/accounts/profile/");
+        return response.data;
+      } catch (error) {
+        const errorMessage = error.message?.includes("Network Error")
+          ? "خطا در اتصال به اینترنت"
+          : error.response?.status === 401
+            ? "نشست شما منقضی شده، لطفا دوباره وارد شوید"
+            : "خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.";
+        dispatch(showToast(toastTimer, errorMessage, "error"));
+        return null;
+      }
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}

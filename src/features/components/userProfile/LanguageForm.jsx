@@ -10,28 +10,28 @@ export default function LanguageForm({ initial, onSave, onCancel }) {
   );
   const [err, setErr] = useState("");
   const submit = () => {
-    if (!f.name.trim()) {
+    const name = f.name.trim();
+    if (!name) {
       setErr("نام زبان الزامی است۔");
       return;
     }
-    onSave({ ...f, name: f.name.trim() });
+    if (name.length > 50) {
+      setErr("حداکثر ۵۰ کاراکتر۔");
+      return;
+    }
+    if (name.length < 2) {
+      setErr("حداقل ۲ کاراکتر۔");
+      return;
+    }
+    onSave({ ...f, name });
   };
   return (
     <div className="form-box no-print">
       <Field id="lang-name" label="نام زبان" required error={err}>
-        <input
-          id="lang-name"
-          className={"input" + (err ? " err" : "")}
-          value={f.name}
-          placeholder="مثلاً انگلیسی"
-          onChange={(e) => {
-            setF({ ...f, name: e.target.value });
-            setErr("");
-          }}
-        />
+        <input autoComplete="off" id="lang-name" className={"input" + (err ? " err" : "")} value={f.name} placeholder="مثلاً انگلیسی" onChange={(e) => { setF({ ...f, name: e.target.value }); setErr(""); }} maxLength={50} />
       </Field>
       <Field id="lang-level" label="سطح تسلط">
-        <select
+        <select autoComplete="off"
           id="lang-level"
           className="input"
           value={f.level}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Field from "../common/Field";
 import TagInput from "../common/TagInput";
 import FormActions from "../common/FormActions";
+import PersianDatePicker from "../common/PersianDatePicker";
 
 const EMPLOYMENT_TYPES = [
   "تمام‌وقت",
@@ -32,48 +33,35 @@ export default function ExperienceForm({ initial, onSave, onCancel }) {
   const [errs, setErrs] = useState({});
   const submit = () => {
     const e = {};
+    const nf = (s) => String(s || "").trim().replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)]);
     if (!f.jobTitle.trim()) e.jobTitle = "عنوان شغلی الزامی است۔";
+    else if (f.jobTitle.trim().length > 200) e.jobTitle = "حداکثر ۲۰۰ کاراکتر۔";
     if (!f.company.trim()) e.company = "نام شرکت یا سازمان الزامی است۔";
+    else if (f.company.trim().length > 200) e.company = "حداکثر ۲۰۰ کاراکتر۔";
     if (!f.startDate.trim()) e.startDate = "تاریخ شروع الزامی است۔";
+    else if (!/^\d{4}\/\d{1,2}$/.test(nf(f.startDate))) e.startDate = "فرمت باید YYYY/MM باشد۔";
+    if (!f.ongoing && f.endDate && !/^\d{4}\/\d{1,2}$/.test(nf(f.endDate))) e.endDate = "فرمت باید YYYY/MM باشد۔";
+    if (f.location && f.location.length > 200) e.location = "حداکثر ۲۰۰ کاراکتر۔";
+    if (f.description && f.description.length > 800) e.description = "حداکثر ۸۰۰ کاراکتر۔";
     setErrs(e);
     if (Object.keys(e).length) return;
-    onSave({ ...f });
+    const payload = { ...f };
+    if (payload.ongoing) payload.endDate = "";
+    onSave(payload);
   };
   return (
     <div className="form-box no-print">
       <div className="grid-2">
         <Field id="ex-title" label="عنوان شغلی" required error={errs.jobTitle}>
-          <input
-            id="ex-title"
-            className={"input" + (errs.jobTitle ? " err" : "")}
-            value={f.jobTitle}
-            placeholder="مثلاً کارآموز توسعهٔ فرانت‌اند"
-            onChange={(e) => setF({ ...f, jobTitle: e.target.value })}
-          />
+          <input autoComplete="off" id="ex-title" className={"input" + (errs.jobTitle ? " err" : "")} value={f.jobTitle} placeholder="مثلاً کارآموز توسعهٔ فرانت‌اند" onChange={(e) => setF({ ...f, jobTitle: e.target.value })} maxLength={200} />
         </Field>
-        <Field
-          id="ex-company"
-          label="شرکت / سازمان"
-          required
-          error={errs.company}
-        >
-          <input
-            id="ex-company"
-            className={"input" + (errs.company ? " err" : "")}
-            value={f.company}
-            placeholder="مثلاً شرکت فناوری آریاتک"
-            onChange={(e) => setF({ ...f, company: e.target.value })}
-          />
+        <Field id="ex-company" label="شرکت / سازمان" required error={errs.company}>
+          <input autoComplete="off" id="ex-company" className={"input" + (errs.company ? " err" : "")} value={f.company} placeholder="مثلاً شرکت فناوری آریاتک" onChange={(e) => setF({ ...f, company: e.target.value })} maxLength={200} />
         </Field>
       </div>
       <div className="grid-2">
         <Field id="ex-type" label="نوع همکاری">
-          <select
-            id="ex-type"
-            className="input"
-            value={f.type}
-            onChange={(e) => setF({ ...f, type: e.target.value })}
-          >
+          <select autoComplete="off" id="ex-type" className="input" value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}>
             {EMPLOYMENT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -81,52 +69,22 @@ export default function ExperienceForm({ initial, onSave, onCancel }) {
             ))}
           </select>
         </Field>
-        <Field id="ex-loc" label="محل کار">
-          <input
-            id="ex-loc"
-            className="input"
-            value={f.location}
-            placeholder="مثلاً تهران / دورکاری"
-            onChange={(e) => setF({ ...f, location: e.target.value })}
-          />
+        <Field id="ex-loc" label="محل کار" error={errs.location}>
+          <input autoComplete="off" id="ex-loc" className={"input" + (errs.location ? " err" : "")} value={f.location} placeholder="مثلاً تهران / دورکاری" onChange={(e) => setF({ ...f, location: e.target.value })} maxLength={200} />
         </Field>
       </div>
       <div className="grid-2">
-        <Field id="ex-start" label="تاریخ شروع" required error={errs.startDate}>
-          <input
-            id="ex-start"
-            className={"input" + (errs.startDate ? " err" : "")}
-            value={f.startDate}
-            placeholder="مثلاً تیر ۱۴۰۳"
-            onChange={(e) => setF({ ...f, startDate: e.target.value })}
-          />
-        </Field>
-        <Field id="ex-end" label="تاریخ پایان">
-          <input
-            id="ex-end"
-            className="input"
-            value={f.endDate}
-            disabled={f.ongoing}
-            placeholder="مثلاً اسفند ۱۴۰۳"
-            onChange={(e) => setF({ ...f, endDate: e.target.value })}
-          />
-        </Field>
+        <PersianDatePicker id="ex-start" label="تاریخ شروع" required error={errs.startDate} value={f.startDate} onChange={(v) => setF({ ...f, startDate: v })} mode="monthYear" />
+        {!f.ongoing ? (
+          <PersianDatePicker id="ex-end" label="تاریخ پایان" error={errs.endDate} value={f.endDate} onChange={(v) => setF({ ...f, endDate: v })} mode="monthYear" />
+        ) : null}
       </div>
       <label className="check-row">
-        <input
-          type="checkbox"
-          checked={f.ongoing}
-          onChange={(e) => setF({ ...f, ongoing: e.target.checked })}
-        />
+        <input autoComplete="off" type="checkbox" checked={f.ongoing} onChange={(e) => setF({ ...f, ongoing: e.target.checked, endDate: e.target.checked ? "" : f.endDate })} />
         همچنان مشغول به همکاری
       </label>
-      <Field id="ex-desc" label="توضیحات">
-        <textarea
-          id="ex-desc"
-          className="input"
-          value={f.description}
-          onChange={(e) => setF({ ...f, description: e.target.value })}
-        />
+      <Field id="ex-desc" label="توضیحات" error={errs.description}>
+        <textarea autoComplete="off" id="ex-desc" className={"input" + (errs.description ? " err" : "")} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} maxLength={800} />
       </Field>
       <TagInput
         id="ex-resp"

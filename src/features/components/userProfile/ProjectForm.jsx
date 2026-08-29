@@ -2,6 +2,8 @@ import { useState } from "react";
 import Field from "../common/Field";
 import TagInput from "../common/TagInput";
 import FormActions from "../common/FormActions";
+import PersianDatePicker from "../common/PersianDatePicker";
+import ImageUploader from "../common/ImageUploader";
 
 const PROJECT_CATEGORIES = ["دانشگاهی", "شخصی", "تیمی", "پژوهشی", "متن‌باز"];
 const TEAM_OPTIONS = ["فردی", "تیمی"];
@@ -17,6 +19,7 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
           category: PROJECT_CATEGORIES[0],
           startDate: "",
           endDate: "",
+          ongoing: false,
           github: "",
           demo: "",
           image: "",
@@ -26,34 +29,36 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
   const [errs, setErrs] = useState({});
   const submit = () => {
     const e = {};
+    const urlRe = /^https?:\/\/.+\..+/;
+    const nf = (s) => String(s || "").trim().replace(/[۰-۹]/g, (d) => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(d)]);
     if (!f.title.trim()) e.title = "عنوان پروژه الزامی است۔";
+    else if (f.title.trim().length > 200) e.title = "حداکثر ۲۰۰ کاراکتر۔";
     if (!f.description.trim()) e.description = "توضیح کوتاه پروژه الزامی است۔";
+    else if (f.description.trim().length > 800) e.description = "حداکثر ۸۰۰ کاراکتر۔";
+    if (!f.startDate.trim()) e.startDate = "تاریخ شروع الزامی است۔";
+    else if (!/^\d{4}\/\d{1,2}$/.test(nf(f.startDate))) e.startDate = "فرمت باید YYYY/MM باشد۔";
+    if (!f.ongoing && f.endDate && !/^\d{4}\/\d{1,2}$/.test(nf(f.endDate))) e.endDate = "فرمت باید YYYY/MM باشد۔";
+    if (f.github && !urlRe.test(f.github)) e.github = "لینک باید با https:// شروع شود۔";
+    if (f.github && f.github.length > 255) e.github = "حداکثر ۲۵۵ کاراکتر۔";
+    if (f.demo && !urlRe.test(f.demo)) e.demo = "لینک باید با https:// شروع شود۔";
+    if (f.demo && f.demo.length > 255) e.demo = "حداکثر ۲۵۵ کاراکتر۔";
     setErrs(e);
     if (Object.keys(e).length) return;
-    onSave({ ...f });
+    const payload = { ...f };
+    if (payload.ongoing) payload.endDate = "";
+    onSave(payload);
   };
   return (
     <div className="form-box no-print">
       <Field id="pr-title" label="عنوان پروژه" required error={errs.title}>
-        <input
-          id="pr-title"
-          className={"input" + (errs.title ? " err" : "")}
-          value={f.title}
-          placeholder="مثلاً وب‌اپ مدیریت پروژه"
-          onChange={(e) => setF({ ...f, title: e.target.value })}
-        />
+        <input autoComplete="off" id="pr-title" className={"input" + (errs.title ? " err" : "")} value={f.title} placeholder="مثلاً وب‌اپ مدیریت پروژه" onChange={(e) => setF({ ...f, title: e.target.value })} maxLength={200} />
       </Field>
       <Field id="pr-desc" label="توضیح کوتاه" required error={errs.description}>
-        <textarea
-          id="pr-desc"
-          className={"input" + (errs.description ? " err" : "")}
-          value={f.description}
-          onChange={(e) => setF({ ...f, description: e.target.value })}
-        />
+        <textarea autoComplete="off" id="pr-desc" className={"input" + (errs.description ? " err" : "")} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} maxLength={800} />
       </Field>
       <div className="grid-2">
         <Field id="pr-cat" label="دسته‌بندی">
-          <select
+          <select autoComplete="off"
             id="pr-cat"
             className="input"
             value={f.category}
@@ -67,7 +72,7 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
           </select>
         </Field>
         <Field id="pr-team" label="وضعیت انجام">
-          <select
+          <select autoComplete="off"
             id="pr-team"
             className="input"
             value={f.team}
@@ -82,57 +87,24 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
         </Field>
       </div>
       <div className="grid-2">
-        <Field id="pr-start" label="تاریخ شروع">
-          <input
-            id="pr-start"
-            className="input"
-            value={f.startDate}
-            placeholder="مثلاً فروردین ۱۴۰۳"
-            onChange={(e) => setF({ ...f, startDate: e.target.value })}
-          />
-        </Field>
-        <Field id="pr-end" label="تاریخ پایان">
-          <input
-            id="pr-end"
-            className="input"
-            value={f.endDate}
-            placeholder="مثلاً دی ۱۴۰۳"
-            onChange={(e) => setF({ ...f, endDate: e.target.value })}
-          />
-        </Field>
+        <PersianDatePicker id="pr-start" label="تاریخ شروع" required error={errs.startDate} value={f.startDate} onChange={(v) => setF({ ...f, startDate: v })} mode="monthYear" />
+        {!f.ongoing ? (
+          <PersianDatePicker id="pr-end" label="تاریخ پایان" error={errs.endDate} value={f.endDate} onChange={(v) => setF({ ...f, endDate: v })} mode="monthYear" />
+        ) : null}
       </div>
+      <label className="check-row">
+        <input autoComplete="off" type="checkbox" checked={!!f.ongoing} onChange={(e) => setF({ ...f, ongoing: e.target.checked, endDate: e.target.checked ? "" : f.endDate })} />
+        هنوز در حال ادامه پروژه هستم
+      </label>
       <div className="grid-2">
-        <Field id="pr-github" label="پیوند گیت‌هاب">
-          <input
-            id="pr-github"
-            dir="ltr"
-            className="input"
-            value={f.github}
-            placeholder="https://github.com/..."
-            onChange={(e) => setF({ ...f, github: e.target.value })}
-          />
+        <Field id="pr-github" label="پیوند گیت‌هاب" error={errs.github}>
+          <input autoComplete="off" id="pr-github" dir="ltr" className={"input" + (errs.github ? " err" : "")} value={f.github} placeholder="https://github.com/..." onChange={(e) => setF({ ...f, github: e.target.value })} maxLength={255} />
         </Field>
-        <Field id="pr-demo" label="پیوند نمایش زنده">
-          <input
-            id="pr-demo"
-            dir="ltr"
-            className="input"
-            value={f.demo}
-            placeholder="https://..."
-            onChange={(e) => setF({ ...f, demo: e.target.value })}
-          />
+        <Field id="pr-demo" label="پیوند نمایش زنده" error={errs.demo}>
+          <input autoComplete="off" id="pr-demo" dir="ltr" className={"input" + (errs.demo ? " err" : "")} value={f.demo} placeholder="https://..." onChange={(e) => setF({ ...f, demo: e.target.value })} maxLength={255} />
         </Field>
       </div>
-      <Field id="pr-img" label="آدرس تصویر پروژه (اختیاری)">
-        <input
-          id="pr-img"
-          dir="ltr"
-          className="input"
-          value={f.image}
-          placeholder="https://..."
-          onChange={(e) => setF({ ...f, image: e.target.value })}
-        />
-      </Field>
+      <ImageUploader id="pr-image" label="تصویر پروژه" value={f.image} onChange={(v) => setF({ ...f, image: v })} maxSizeMB={2} minWidth={300} minHeight={180} />
       <TagInput
         id="pr-tech"
         label="فناوری‌های استفاده‌شده"

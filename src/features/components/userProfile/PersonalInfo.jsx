@@ -1,81 +1,66 @@
 import Icon from "../common/Icon";
 import SectionCard from "../common/SectionCard";
 import Field from "../common/Field";
+import PersianDatePicker from "../common/PersianDatePicker";
 
 function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
   return (
     <SectionCard icon="user" title="اطلاعات شخصی" titleId="personal-title">
       {editMode ? (
         <div className="no-print">
-          <div className="grid-2">
-            <Field id="pi-birth" label="تاریخ تولد">
-              <input
-                id="pi-birth"
-                className="input"
-                value={p.birthDate}
-                placeholder="مثلاً ۱۳۸۲/۰۵/۱۴"
-                onChange={(e) => updatePersonal("birthDate", e.target.value)}
-              />
-            </Field>
-            <Field id="pi-stud" label="شمارهٔ دانشجویی">
-              <input
-                id="pi-stud"
-                className="input"
-                value={p.studentId}
-                onChange={(e) => updatePersonal("studentId", e.target.value)}
-              />
-            </Field>
-          </div>
-          <Field
-            id="pi-email"
-            label="ایمیل"
-            required
-            error={personalErrors.email}
-          >
+          <PersianDatePicker
+            id="pi-birth"
+            label="تاریخ تولد"
+            value={p.birthDate}
+            onChange={(v) => updatePersonal("birthDate", v)}
+            mode="full"
+            error={personalErrors.birthDate}
+          />
+          <Field id="pi-phone" label="شمارهٔ تماس" error={personalErrors.phone}>
             <input
-              id="pi-email"
-              dir="ltr"
-              type="email"
-              className={"input" + (personalErrors.email ? " err" : "")}
-              value={p.email}
-              onChange={(e) => updatePersonal("email", e.target.value)}
-            />
-          </Field>
-          <Field id="pi-phone" label="شمارهٔ تماس">
-            <input
+              autoComplete="off"
               id="pi-phone"
-              className="input"
+              className={"input" + (personalErrors.phone ? " err" : "")}
               value={p.phone}
               placeholder="مثلاً ۰۹۱۲ ۳۴۵ ۶۷۸۹"
               onChange={(e) => updatePersonal("phone", e.target.value)}
+              maxLength={30}
             />
           </Field>
-          <Field id="pi-linkedin" label="لینکدین">
+          <Field id="pi-linkedin" label="لینکدین" error={personalErrors.linkedin}>
             <input
+              autoComplete="off"
               id="pi-linkedin"
               dir="ltr"
-              className="input"
+              className={"input" + (personalErrors.linkedin ? " err" : "")}
               value={p.linkedin}
               onChange={(e) => updatePersonal("linkedin", e.target.value)}
+              maxLength={255}
+              placeholder="https://linkedin.com/in/..."
             />
           </Field>
-          <Field id="pi-github" label="گیت‌هاب">
+          <Field id="pi-github" label="گیت‌هاب" error={personalErrors.github}>
             <input
+              autoComplete="off"
               id="pi-github"
               dir="ltr"
-              className="input"
+              className={"input" + (personalErrors.github ? " err" : "")}
               value={p.github}
               onChange={(e) => updatePersonal("github", e.target.value)}
+              maxLength={255}
+              placeholder="https://github.com/..."
             />
           </Field>
-          <Field id="pi-web" label="وب‌سایت شخصی">
+          <Field id="pi-web" label="وب‌سایت شخصی" error={personalErrors.website}>
             <input
+              autoComplete="off"
               id="pi-web"
               dir="ltr"
-              className="input"
+              className={"input" + (personalErrors.website ? " err" : "")}
               value={p.website}
               placeholder="https://..."
               onChange={(e) => updatePersonal("website", e.target.value)}
+              maxLength={255}
             />
           </Field>
         </div>
@@ -92,14 +77,14 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
               </div>
             </div>
           ) : null}
-          {p.studentId ? (
+          {p.username ? (
             <div className="info-row">
               <span className="ic">
-                <Icon name="hash" size={15} />
+                <Icon name="user" size={15} />
               </span>
               <div>
-                <span className="lbl">شمارهٔ دانشجویی</span>
-                <span className="val">{p.studentId}</span>
+                <span className="lbl">نام کاربری</span>
+                <span className="val ltr">{p.username}</span>
               </div>
             </div>
           ) : null}

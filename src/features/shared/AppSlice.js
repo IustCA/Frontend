@@ -17,7 +17,7 @@ const appSlice = createSlice({
 export const { setToast } = appSlice.actions;
 
 export function showToast(toastTimer, msg, type = "ok") {
-  if (toastTimer.current) clearTimeout(toastTimer.current);
+  if (toastTimer.current) clearTimeout(toastTimer);
 
   return async function (dispatch) {
     dispatch(setToast({ msg, type }));

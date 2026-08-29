@@ -95,7 +95,7 @@ export default function Projects({
                       {pr.startDate ? (
                         <span>
                           <Icon name="calendar" size={13} />
-                          {dateRange(pr.startDate, pr.endDate, false)}
+                          {dateRange(pr.startDate, pr.endDate, !!pr.ongoing)}
                         </span>
                       ) : null}
                       <span>

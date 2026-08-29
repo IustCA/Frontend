@@ -15,7 +15,7 @@ const getCookie = (name) => {
   return null;
 };
 
-export function useUserInfo() {
+export function useUserInfo(toastTimer) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -28,13 +28,15 @@ export function useUserInfo() {
         return;
       }
       try {
-        const response = await api.get("/api/auth/me/");
+        const response = await api.get("/api/accounts/auth/me/");
         return response.data;
       } catch (error) {
-        const errorMessage = error.message.includes("Network Error")
+        const errorMessage = error.message?.includes("Network Error")
           ? "خطا در اتصال به اینترنت"
-          : "خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.";
-        dispatch(showToast("خطا در دریافت اطلاعات", errorMessage, "error"));
+          : error.response?.status === 401
+            ? "توکن نامعتبر است"
+            : "خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.";
+        dispatch(showToast(toastTimer, errorMessage, "error"));
         return null;
       }
     },
