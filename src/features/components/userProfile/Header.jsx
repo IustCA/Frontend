@@ -1,11 +1,11 @@
 import { useDispatch } from "react-redux";
+import { useRef, useState } from "react";
 import Field from "../common/Field";
 import Icon from "../common/Icon";
 import { showToast } from "../../shared/AppSlice";
 
 const IMG_AVATAR =
   "https://image.qwenlm.ai/public_source/d4ae5256-6a4f-4e2a-b022-021cf3a0d064/14cd1e56b-e87c-4b3d-8281-bcbb64951014.png";
-
 const AVAILABILITY_OPTIONS = [
   "آماده همکاری",
   "آماده کارآموزی",
@@ -31,13 +31,58 @@ export default function Header({
   setPersonalErrors,
   setEditMode,
   cancelProfile,
+  editing,
 }) {
   const dispatch = useDispatch();
+  const avatarRef = useRef(null);
+  const [avatarErr, setAvatarErr] = useState("");
 
   const startEditProfile = () => {
     backupRef.current = clone(profile);
     setPersonalErrors({});
     setEditMode(true);
+  };
+
+  const handleAvatar = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setAvatarErr("فرمت باید JPG/PNG/WEBP باشد");
+      dispatch(showToast(toastTimer, "فرمت تصویر باید JPG، PNG یا WEBP باشد.", "error"));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarErr("حجم حداکثر ۲MB");
+      dispatch(showToast(toastTimer, "حجم تصویر نباید بیشتر از ۲ مگابایت باشد.", "error"));
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      if (img.width < 200 || img.height < 200) {
+        setAvatarErr("حداقل ۲۰۰×۲۰۰");
+        dispatch(showToast(toastTimer, "ابعاد تصویر خیلی کوچک است. حداقل ۲۰۰×۲۰۰ پیکسل.", "error"));
+        URL.revokeObjectURL(url);
+        return;
+      }
+      if (img.width > 3000 || img.height > 3000) {
+        setAvatarErr("حداکثر ۳۰۰۰×۳۰۰۰");
+        dispatch(showToast(toastTimer, "ابعاد تصویر خیلی بزرگ است.", "error"));
+        URL.revokeObjectURL(url);
+        return;
+      }
+      setAvatarErr("");
+      const reader = new FileReader();
+      reader.onload = () => updatePersonal("avatar", reader.result);
+      reader.readAsDataURL(file);
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      setAvatarErr("فایل معتبر نیست");
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
   };
 
   const shareProfile = async () => {
@@ -71,13 +116,29 @@ export default function Header({
               {(p.fullName || "؟").trim().charAt(0)}
             </span>
             <img
-              src={IMG_AVATAR}
+              src={p.avatar || IMG_AVATAR}
               alt={"تصویر پروفایل " + p.fullName}
               onError={(e) => {
-                e.target.style.display = "none";
+                e.target.src = IMG_AVATAR;
               }}
             />
           </div>
+          {editMode ? (
+            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+              <input name="no_autofill_random" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" ref={avatarRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatar} style={{ display: "none" }} />
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => avatarRef.current?.click()}>
+                <Icon name="user" size={13} />
+                تغییر تصویر
+              </button>
+              {p.avatar ? (
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => updatePersonal("avatar", "")}>
+                  حذف تصویر
+                </button>
+              ) : null}
+              {avatarErr ? <span style={{ fontSize: 11, color: "var(--red)" }}>{avatarErr}</span> : null}
+              <span style={{ fontSize: 10, color: "var(--muted)" }}>حداکثر ۲MB — ۲۰۰×۲۰۰ تا ۳۰۰۰×۳۰۰۰</span>
+            </div>
+          ) : null}
         </div>
 
         <div className="header-info">
@@ -90,13 +151,16 @@ export default function Header({
                   required
                   error={personalErrors.fullName}
                 >
-                  <input
-                    id="hd-name"
+                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                    autoComplete="off"
+                    name="hd-name_no_autofill" id="hd-name"
                     className={
                       "input" + (personalErrors.fullName ? " err" : "")
                     }
                     value={p.fullName}
                     onChange={(e) => updatePersonal("fullName", e.target.value)}
+                    maxLength={60}
+                    placeholder="مثلاً علی رضایی"
                   />
                 </Field>
                 <Field
@@ -105,54 +169,67 @@ export default function Header({
                   required
                   error={personalErrors.title}
                 >
-                  <input
-                    id="hd-title"
+                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                    autoComplete="off"
+                    name="hd-title_no_autofill" id="hd-title"
                     className={"input" + (personalErrors.title ? " err" : "")}
                     value={p.title}
                     onChange={(e) => updatePersonal("title", e.target.value)}
+                    maxLength={80}
+                    placeholder="مثلاً توسعه‌دهنده فرانت‌اند"
                   />
                 </Field>
               </div>
               <div className="grid-2">
-                <Field id="hd-uni" label="دانشگاه">
-                  <input
-                    id="hd-uni"
-                    className="input"
+                <Field id="hd-uni" label="دانشگاه" error={personalErrors.university}>
+                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                    autoComplete="off"
+                    name="hd-uni_no_autofill" id="hd-uni"
+                    className={"input" + (personalErrors.university ? " err" : "")}
                     value={p.university}
                     onChange={(e) =>
                       updatePersonal("university", e.target.value)
                     }
+                    maxLength={80}
                   />
                 </Field>
-                <Field id="hd-field" label="رشتهٔ تحصیلی">
-                  <input
-                    id="hd-field"
-                    className="input"
+                <Field id="hd-field" label="رشتهٔ تحصیلی" error={personalErrors.field}>
+                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                    autoComplete="off"
+                    name="hd-field_no_autofill" id="hd-field"
+                    className={"input" + (personalErrors.field ? " err" : "")}
                     value={p.field}
                     onChange={(e) => updatePersonal("field", e.target.value)}
+                    maxLength={80}
                   />
                 </Field>
               </div>
               <div className="grid-2">
-                <Field id="hd-sem" label="ترم تحصیلی">
-                  <input
-                    id="hd-sem"
-                    className="input"
+                <Field id="hd-sem" label="ترم تحصیلی" error={personalErrors.semester}>
+                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                    autoComplete="off"
+                    name="hd-sem_no_autofill" id="hd-sem"
+                    className={"input" + (personalErrors.semester ? " err" : "")}
                     value={p.semester}
                     onChange={(e) => updatePersonal("semester", e.target.value)}
+                    maxLength={20}
+                    placeholder="مثلاً ترم ۶"
                   />
                 </Field>
-                <Field id="hd-city" label="شهر محل سکونت">
-                  <input
-                    id="hd-city"
-                    className="input"
+                <Field id="hd-city" label="شهر محل سکونت" error={personalErrors.city}>
+                  <input autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                    autoComplete="off"
+                    name="hd-city_no_autofill" id="hd-city"
+                    className={"input" + (personalErrors.city ? " err" : "")}
                     value={p.city}
                     onChange={(e) => updatePersonal("city", e.target.value)}
+                    maxLength={50}
                   />
                 </Field>
               </div>
               <Field id="hd-avail" label="وضعیت همکاری">
-                <select
+                <select autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other"
+                  autoComplete="off"
                   id="hd-avail"
                   className="input"
                   value={p.availability}
@@ -216,14 +293,27 @@ export default function Header({
         <div className="header-actions no-print">
           {editMode ? (
             <>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={saveProfile}
-              >
-                <Icon name="check" size={16} />
-                ذخیره تغییرات
-              </button>
+              <div className="btn-wrap">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={saveProfile}
+                  aria-disabled={!!editing}
+                  aria-describedby={editing ? "save-tip-header" : undefined}
+                >
+                  <Icon name="check" size={16} />
+                  ذخیره تغییرات
+                </button>
+                {editing ? (
+                  <span
+                    id="save-tip-header"
+                    className="quick-tooltip"
+                    role="tooltip"
+                  >
+                    ابتدا فرم باز را تکمیل یا لغو کنید
+                  </span>
+                ) : null}
+              </div>
               <button
                 type="button"
                 className="btn btn-outline"

@@ -4,6 +4,9 @@ import Icon from "../common/Icon";
 import SectionCard from "../common/SectionCard";
 import ProjectForm from "./ProjectForm";
 
+const IMG_MOBILE =
+  "https://image.qwenlm.ai/public_source/d4ae5256-6a4f-4e2a-b022-021cf3a0d064/191181357-05ef-41dc-a7ed-8875a3431772.png";
+
 export default function Projects({
   profile,
   isFormOpen,
@@ -62,19 +65,15 @@ export default function Projects({
                     </div>
                   ) : null}
                   <div className="project-img">
-                    <span className="ph-icon">
-                      <Icon name="folder" size={34} />
-                    </span>
-                    {pr.image ? (
-                      <img
-                        src={pr.image}
-                        alt={"تصویر پروژهٔ " + pr.title}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                    ) : null}
+                    <img
+                      src={pr.image || IMG_MOBILE}
+                      alt={"تصویر پروژهٔ " + pr.title}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = IMG_MOBILE;
+                      }}
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                   </div>
                   <div className="project-body">
                     <div className="proj-top">
@@ -95,7 +94,7 @@ export default function Projects({
                       {pr.startDate ? (
                         <span>
                           <Icon name="calendar" size={13} />
-                          {dateRange(pr.startDate, pr.endDate, false)}
+                          {dateRange(pr.startDate, pr.endDate, !!pr.ongoing)}
                         </span>
                       ) : null}
                       <span>

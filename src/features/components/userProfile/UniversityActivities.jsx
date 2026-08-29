@@ -51,11 +51,11 @@ export default function UniversityActivities({
                     {ac.role ? ac.role + " — " : ""}
                     {ac.organization}
                   </p>
-                  {ac.date ? (
+                  {(ac.startDate || ac.date) ? (
                     <div className="meta">
                       <span>
                         <Icon name="clock" size={13} />
-                        {ac.date}
+                        {ac.startDate ? `${ac.startDate}${ac.ongoing ? " تا اکنون" : ac.endDate ? ` تا ${ac.endDate}` : ""}` : ac.date}
                       </span>
                     </div>
                   ) : null}

@@ -31,14 +31,11 @@ function SkeletonText({ lines = 3, className = "" }) {
   );
 }
 
-// ----------------------- Header Skeleton -----------------------
 export function ProfileHeaderSkeleton() {
   return (
     <div className="bg-white border border-[#e7eaf4] rounded-[18px] shadow-[0_1px_2px_rgba(23,26,64,.05),0_10px_28px_rgba(23,26,64,.07)] overflow-hidden animate-pulse">
-      {/* cover */}
       <Skeleton className="h-37.5 rounded-none w-full bg-linear-to-r from-gray-200 via-gray-100 to-gray-200" />
       <div className="px-6.5 pb-6.5 flex gap-5 flex-wrap items-start">
-        {/* avatar */}
         <div className="-mt-13 relative">
           <SkeletonCircle
             size={118}
@@ -49,7 +46,6 @@ export function ProfileHeaderSkeleton() {
         <div className="flex-1 min-w-65 pt-3.5 flex flex-col gap-3">
           <Skeleton className="h-7 w-48 rounded-lg" />
           <Skeleton className="h-4 w-72 max-w-full rounded-lg bg-indigo-100/70" />
-          {/* chips */}
           <div className="flex flex-wrap gap-2 mt-1">
             <Skeleton className="h-6 w-28 rounded-full" />
             <Skeleton className="h-6 w-32 rounded-full" />
@@ -62,7 +58,6 @@ export function ProfileHeaderSkeleton() {
           </div>
         </div>
 
-        {/* actions */}
         <div className="flex gap-2.5 flex-wrap pt-4.5 mr-auto w-full lg:w-auto">
           <Skeleton className="h-10.5 w-32 rounded-xl" />
           <Skeleton className="h-10.5 w-32 rounded-xl bg-white border border-gray-200" />
@@ -73,7 +68,6 @@ export function ProfileHeaderSkeleton() {
   );
 }
 
-// ----------------------- Card Wrapper Skeleton -----------------------
 function CardSkeleton({ children, className = "" }) {
   return (
     <div
@@ -94,7 +88,6 @@ function SectionHeadSkeleton({ withAction = false }) {
   );
 }
 
-// ----------------------- Sidebar Skeletons -----------------------
 export function CompletionSkeleton() {
   return (
     <CardSkeleton>
@@ -193,7 +186,6 @@ export function LanguagesSkeleton() {
   );
 }
 
-// ----------------------- Main Content Skeletons -----------------------
 export function AboutSkeleton() {
   return (
     <CardSkeleton>
@@ -218,7 +210,6 @@ export function TimelineSkeleton({ items = 2 }) {
             key={i}
             className="relative border border-[#eceef8] rounded-xl p-4 bg-[#fdfdff] flex flex-col gap-2.5"
           >
-            {/* dot */}
             <span className="absolute -right-6.5 top-3 w-3 h-3 rounded-full bg-white border-[3px] border-indigo-500 shadow-[0_0_0_3px_white]" />
             <Skeleton className="h-4 w-40 rounded" />
             <Skeleton className="h-3 w-28 rounded bg-indigo-50" />
@@ -300,7 +291,6 @@ export function ListCardsSkeleton({ items = 2 }) {
   );
 }
 
-// ----------------------- Full Page Loader -----------------------
 export function ProfilePageSkeleton() {
   return (
     <div
@@ -316,7 +306,6 @@ export function ProfilePageSkeleton() {
       <ProfileHeaderSkeleton />
 
       <div className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] gap-5.5 items-start">
-        {/* Sidebar */}
         <aside className="flex flex-col gap-5.5 min-w-0">
           <CompletionSkeleton />
           <InfoRowsSkeleton rows={5} />
@@ -326,7 +315,6 @@ export function ProfilePageSkeleton() {
           <InfoRowsSkeleton rows={4} />
         </aside>
 
-        {/* Main */}
         <main className="flex flex-col gap-5.5 min-w-0">
           <AboutSkeleton />
           <TimelineSkeleton items={2} />
@@ -341,7 +329,6 @@ export function ProfilePageSkeleton() {
   );
 }
 
-// alias برای استفاده راحت‌تر
 export function PageLoader() {
   return <ProfilePageSkeleton />;
 }

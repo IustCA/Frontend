@@ -4,15 +4,17 @@ import SectionCard from "../common/SectionCard";
 export default function Contact({ p, setContactOpen }) {
   return (
     <SectionCard icon="mail" title="اطلاعات تماس" titleId="contact-side-title">
-      <div className="info-row">
-        <span className="ic">
-          <Icon name="mail" size={15} />
-        </span>
-        <div>
-          <span className="lbl">ایمیل</span>
-          <span className="val ltr">{p.email}</span>
+      {p.username ? (
+        <div className="info-row">
+          <span className="ic">
+            <Icon name="user" size={15} />
+          </span>
+          <div>
+            <span className="lbl">نام کاربری</span>
+            <span className="val ltr">{p.username}</span>
+          </div>
         </div>
-      </div>
+      ) : null}
       {p.phone ? (
         <div className="info-row">
           <span className="ic">

@@ -2,7 +2,7 @@ import Icon from "./Icon";
 
 export default function EditableItem({ editMode, onEdit, onDelete, children }) {
   return (
-    <div className="item-box">
+    <div className={`item-box${editMode ? " item-box--editing" : ""}`}>
       {editMode ? (
         <div className="item-tools no-print">
           <button

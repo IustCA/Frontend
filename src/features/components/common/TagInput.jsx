@@ -13,7 +13,7 @@ export default function TagInput({ id, label, value, onChange, placeholder }) {
     <div className="field">
       <label htmlFor={id}>{label}</label>
       <div style={{ display: "flex", gap: 8 }}>
-        <input
+        <input name="no_autofill_random" autoCorrect="off" autoCapitalize="off" spellCheck={false} data-lpignore="true" data-form-type="other" autoComplete="off"
           id={id}
           className="input"
           value={draft}

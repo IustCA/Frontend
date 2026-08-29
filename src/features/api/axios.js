@@ -2,26 +2,16 @@ import axios from "axios";
 
 const TOKEN_STORAGE_KEY = "access_token";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? "/api";
-
 const api = axios.create({
-  baseURL: baseURL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "/api",
+  headers: { "Content-Type": "application/json" },
 });
-const getCookie = (name) => {
+export const getCookie = (name) => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return parts.pop()?.split(";").shift() || null;
-  }
-  return null;
+  return parts.length === 2 ? parts.pop()?.split(";").shift() || null : null;
 };
-
-const getAccessToken = () => {
-  return getCookie(TOKEN_STORAGE_KEY);
-};
+const getAccessToken = () => getCookie(TOKEN_STORAGE_KEY);
 
 api.interceptors.request.use(
   (config) => {

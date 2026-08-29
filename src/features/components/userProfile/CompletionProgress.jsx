@@ -3,7 +3,7 @@ import Icon from "../common/Icon";
 
 const faNum = (value) => Number(value || 0).toLocaleString("fa-IR");
 
-function CompletionProgress({ profile, isValidEmail }) {
+function CompletionProgress({ profile }) {
   const completion = useMemo(() => {
     const pr = profile.personal;
     const checks = [
@@ -15,7 +15,7 @@ function CompletionProgress({ profile, isValidEmail }) {
         ok: String(pr.about || "").trim().length > 40,
         label: "بخش «درباره من» را بنویسید۔",
       },
-      { ok: isValidEmail(pr.email), label: "ایمیل معتبر وارد کنید۔" },
+      { ok: !!pr.username && pr.username.trim().length >= 3, label: "نام کاربری را تکمیل کنید۔" },
       { ok: profile.skills.length >= 3, label: "حداقل ۳ مهارت اضافه کنید۔" },
       {
         ok: profile.education.length >= 1,
@@ -53,7 +53,7 @@ function CompletionProgress({ profile, isValidEmail }) {
       percent: Math.round((done / checks.length) * 100),
       suggestions: checks.filter((c) => !c.ok).map((c) => c.label),
     };
-  }, [profile, isValidEmail]);
+  }, [profile]);
 
   return (
     <section className="card" aria-labelledby="completion-title">
