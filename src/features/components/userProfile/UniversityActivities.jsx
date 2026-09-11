@@ -11,7 +11,7 @@ export default function UniversityActivities({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
 }) {
   return (
@@ -35,7 +35,7 @@ export default function UniversityActivities({
                   key={ac.id}
                   initial={ac}
                   onSave={(d) => saveItem("activities", ac.id, d)}
-                  onCancel={() => setEditing(null)}
+                  onCancel={() => cancelItem("activities")}
                 />
               ) : (
                 <EditableItem
@@ -83,7 +83,7 @@ export default function UniversityActivities({
           {isFormOpen("activities", "new") ? (
             <ActivityForm
               onSave={(d) => saveItem("activities", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("activities")}
             />
           ) : null}
           {editMode && !isFormOpen("activities", "new") ? (

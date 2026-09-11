@@ -5,7 +5,10 @@ import TagInput from "../common/TagInput";
 
 export default function Interests({ profile, editMode, setProfile }) {
   const updateInterests = (list) =>
-    setProfile((prev) => ({ ...prev, interests: Array.from(new Set(list)) }));
+    setProfile((prev) => ({
+      ...(prev ?? profile),
+      interests: Array.from(new Set(list)),
+    }));
 
   return (
     <SectionCard icon="heart" title="علایق" titleId="interests-title">

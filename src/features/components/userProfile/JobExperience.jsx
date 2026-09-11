@@ -11,7 +11,7 @@ export default function JobExperience({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
   dateRange,
 }) {
@@ -32,7 +32,7 @@ export default function JobExperience({
                   <ExperienceForm
                     initial={ex}
                     onSave={(d) => saveItem("experiences", ex.id, d)}
-                    onCancel={() => setEditing(null)}
+                    onCancel={() => cancelItem("experiences")}
                   />
                 </div>
               ) : (
@@ -87,7 +87,7 @@ export default function JobExperience({
           {isFormOpen("experiences", "new") ? (
             <ExperienceForm
               onSave={(d) => saveItem("experiences", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("experiences")}
             />
           ) : null}
           {editMode && !isFormOpen("experiences", "new") ? (

@@ -24,10 +24,8 @@ export default function Header({
   personalErrors,
   updatePersonal,
   saveProfile,
-  clone,
   toastTimer,
   profile,
-  backupRef,
   setPersonalErrors,
   setEditMode,
   cancelProfile,
@@ -38,7 +36,6 @@ export default function Header({
   const [avatarErr, setAvatarErr] = useState("");
 
   const startEditProfile = () => {
-    backupRef.current = clone(profile);
     setPersonalErrors({});
     setEditMode(true);
   };
@@ -142,15 +139,7 @@ export default function Header({
             />
           </div>
           {editMode ? (
-            <div
-              style={{
-                marginTop: 8,
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-                alignItems: "center",
-              }}
-            >
+            <div className="avatar-actions">
               <input
                 name="no_autofill_random"
                 autoComplete="off"
@@ -225,7 +214,6 @@ export default function Header({
                 <Field
                   id="hd-title"
                   label="عنوان حرفه‌ای"
-                  required
                   error={personalErrors.title}
                 >
                   <input

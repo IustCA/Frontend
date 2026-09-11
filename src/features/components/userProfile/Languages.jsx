@@ -10,7 +10,7 @@ export default function Languages({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
 }) {
   return (
@@ -29,7 +29,7 @@ export default function Languages({
                 key={lg.id}
                 initial={lg}
                 onSave={(d) => saveItem("languages", lg.id, d)}
-                onCancel={() => setEditing(null)}
+                onCancel={() => cancelItem("languages")}
               />
             ) : (
               <EditableItem
@@ -50,7 +50,7 @@ export default function Languages({
           {isFormOpen("languages", "new") ? (
             <LanguageForm
               onSave={(d) => saveItem("languages", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("languages")}
             />
           ) : null}
           {editMode && !isFormOpen("languages", "new") ? (

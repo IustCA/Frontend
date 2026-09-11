@@ -11,7 +11,7 @@ export default function EducationalBackground({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
   dateRange,
 }) {
@@ -32,7 +32,7 @@ export default function EducationalBackground({
                   <EducationForm
                     initial={ed}
                     onSave={(d) => saveItem("education", ed.id, d)}
-                    onCancel={() => setEditing(null)}
+                    onCancel={() => cancelItem("education")}
                   />
                 </div>
               ) : (
@@ -78,7 +78,7 @@ export default function EducationalBackground({
           {isFormOpen("education", "new") ? (
             <EducationForm
               onSave={(d) => saveItem("education", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("education")}
             />
           ) : null}
           {editMode && !isFormOpen("education", "new") ? (

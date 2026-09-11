@@ -11,7 +11,7 @@ export default function Certificates({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
 }) {
   return (
@@ -36,7 +36,7 @@ export default function Certificates({
                   key={ce.id}
                   initial={ce}
                   onSave={(d) => saveItem("certificates", ce.id, d)}
-                  onCancel={() => setEditing(null)}
+                  onCancel={() => cancelItem("certificates")}
                 />
               ) : (
                 <EditableItem
@@ -111,7 +111,7 @@ export default function Certificates({
           {isFormOpen("certificates", "new") ? (
             <CertificateForm
               onSave={(d) => saveItem("certificates", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("certificates")}
             />
           ) : null}
           {editMode && !isFormOpen("certificates", "new") ? (

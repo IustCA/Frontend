@@ -11,7 +11,7 @@ export default function Achievements({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
 }) {
   return (
@@ -36,7 +36,7 @@ export default function Achievements({
                   key={ah.id}
                   initial={ah}
                   onSave={(d) => saveItem("achievements", ah.id, d)}
-                  onCancel={() => setEditing(null)}
+                  onCancel={() => cancelItem("achievements")}
                 />
               ) : (
                 <EditableItem
@@ -93,7 +93,7 @@ export default function Achievements({
           {isFormOpen("achievements", "new") ? (
             <AchievementForm
               onSave={(d) => saveItem("achievements", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("achievements")}
             />
           ) : null}
           {editMode && !isFormOpen("achievements", "new") ? (

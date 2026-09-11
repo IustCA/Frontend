@@ -61,6 +61,34 @@ p {
   margin: 0 auto;
   padding: 22px 18px 120px;
 }
+/* همه حالت‌ها (نمایش و ویرایش): روی متن‌های غیرفیلدی کرسر متنی نیاید */
+.app {
+  caret-color: transparent;
+}
+.app :where(h1, h2, h3, h4, p, span, div, li, ul, label) {
+  cursor: default;
+}
+.app .card :where(p, h1, h2, h3, h4, span, div, li, label),
+.app .header-card :where(p, h1, h2, h3, h4, span, div, li, label) {
+  user-select: none;
+  -webkit-user-select: none;
+  caret-color: transparent;
+}
+.app button,
+.app a,
+.app .btn,
+.app .icon-btn,
+.app .add-btn {
+  cursor: pointer;
+}
+.app input,
+.app textarea,
+.app select {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  caret-color: auto;
+}
 
 .btn {
   display: inline-flex;
@@ -231,6 +259,23 @@ p {
 }
 .avatar-wrap {
   margin-top: -52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 118px;
+  flex-shrink: 0;
+}
+.avatar-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  align-items: stretch;
+}
+.avatar-actions .btn {
+  width: 100%;
+  justify-content: center;
 }
 .avatar {
   position: relative;
@@ -932,6 +977,7 @@ textarea.input {
   }
   .avatar-wrap {
     margin-top: -44px;
+    width: 96px;
   }
   .header-info h1 {
     font-size: 21px;

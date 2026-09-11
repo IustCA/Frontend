@@ -73,6 +73,26 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
               فقط عدد، ۱۱ رقم با 09 شروع شود
             </div>
           </Field>
+          <Field id="pi-email" label="ایمیل" error={personalErrors.email}>
+            <input
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
+              autoComplete="off"
+              name="pi-email_no_autofill"
+              id="pi-email"
+              dir="ltr"
+              type="email"
+              className={"input ltr" + (personalErrors.email ? " err" : "")}
+              value={p.email || ""}
+              onChange={(e) => updatePersonal("email", e.target.value)}
+              maxLength={254}
+              placeholder="example@mail.com"
+              inputMode="email"
+            />
+          </Field>
           <Field
             id="pi-linkedin"
             label="لینکدین"
@@ -157,6 +177,17 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
               <div>
                 <span className="lbl">نام کاربری</span>
                 <span className="val ltr">{p.username}</span>
+              </div>
+            </div>
+          ) : null}
+          {p.email ? (
+            <div className="info-row">
+              <span className="ic">
+                <Icon name="mail" size={15} />
+              </span>
+              <div>
+                <span className="lbl">ایمیل</span>
+                <span className="val ltr">{p.email}</span>
               </div>
             </div>
           ) : null}

@@ -111,5 +111,3 @@ export function isBeforeStr(dateStr, minStr, mode = "monthYear") {
   const min = parseValue(minStr);
   return isBeforeMin(p.year, p.month, p.day, min, mode);
 }
-
-export { isAfterToday, isBeforeMin };

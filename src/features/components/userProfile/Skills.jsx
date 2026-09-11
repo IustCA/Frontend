@@ -23,7 +23,7 @@ export default function Skills({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
 }) {
   return (
@@ -49,7 +49,7 @@ export default function Skills({
                         key={s.id}
                         initial={s}
                         onSave={(d) => saveItem("skills", s.id, d)}
-                        onCancel={() => setEditing(null)}
+                        onCancel={() => cancelItem("skills")}
                         SKILL_CATEGORIES={SKILL_CATEGORIES}
                       />
                     ) : (
@@ -86,7 +86,7 @@ export default function Skills({
           {isFormOpen("skills", "new") ? (
             <SkillForm
               onSave={(d) => saveItem("skills", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("skills")}
               SKILL_CATEGORIES={SKILL_CATEGORIES}
             />
           ) : null}

@@ -329,8 +329,4 @@ export function ProfilePageSkeleton() {
   );
 }
 
-export function PageLoader() {
-  return <ProfilePageSkeleton />;
-}
-
 export default ProfilePageSkeleton;

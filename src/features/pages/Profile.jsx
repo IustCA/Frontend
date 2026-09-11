@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { ProfilePageSkeleton } from "../shared/PageLoader.jsx";
 import { showToast } from "../shared/AppSlice";
 import { useDispatch } from "react-redux";
@@ -19,7 +19,6 @@ import Projects from "../components/userProfile/Projects.jsx";
 import Certificates from "../components/userProfile/Certificates.jsx";
 import Achievements from "../components/userProfile/Achievements.jsx";
 import EditModeBar from "../components/userProfile/EditModeBar.jsx";
-import ContactModal from "../components/userProfile/ContactModal.jsx";
 import { useProfileData } from "../hooks/useProfileData.jsx";
 import { useQueryClient } from "react-query";
 import api from "../api/axios";
@@ -37,9 +36,6 @@ const SECTION_ENDPOINT = {
 };
 
 const uid = () => "id-" + Math.random().toString(36).slice(2, 9);
-const isValidEmail = (value) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value || "").trim());
-const clone = (obj) => JSON.parse(JSON.stringify(obj));
 const dateRange = (start, end, ongoing) => {
   if (!start) return "";
   if (ongoing) return `${start} تا اکنون`;
@@ -53,48 +49,37 @@ export default function Profile({ toastTimer }) {
   const { data: profileData, isLoading: isLoading2 } =
     useProfileData(toastTimer);
   const queryClient = useQueryClient();
-  const [profile, setProfile] = useState(null);
+  const [draft, setDraft] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editing, setEditing] = useState(null);
   const [personalErrors, setPersonalErrors] = useState({});
-  const [contactOpen, setContactOpen] = useState(false);
-  const backupRef = useRef(null);
+
+  // تک‌منبع حقیقت: خارج از ویرایش از کش سرور، داخل ویرایش از درفت محلی
+  const profile = editMode ? (draft ?? profileData) : profileData;
+  const setProfile = setDraft;
+
+  const enterEditMode = () => {
+    setPersonalErrors({});
+    setDraft(profileData);
+    setEditMode(true);
+  };
 
   const updatePersonal = useCallback(
     (key, value) =>
-      setProfile((prev) => ({
-        ...prev,
-        personal: { ...prev.personal, [key]: value },
-      })),
-    [],
-  );
-  const handleUsernameChanged = useCallback(
-    (newUsername) => {
-      setProfile((prev) =>
-        prev
-          ? { ...prev, personal: { ...prev.personal, username: newUsername } }
-          : prev,
-      );
-      if (backupRef.current?.personal)
-        backupRef.current = {
-          ...backupRef.current,
-          personal: { ...backupRef.current.personal, username: newUsername },
+      setDraft((prev) => {
+        const base = prev ?? profileData;
+        if (!base) return prev;
+        return {
+          ...base,
+          personal: { ...base.personal, [key]: value },
         };
-      queryClient.setQueryData(["fetch_profile_data"], (old) =>
-        old
-          ? { ...old, personal: { ...old.personal, username: newUsername } }
-          : old,
-      );
-      queryClient.setQueryData(["fetch_user_info"], (old) => {
-        if (!old) return old;
-        if (old.user)
-          return { ...old, user: { ...old.user, username: newUsername } };
-        if (old.username) return { ...old, username: newUsername };
-        return old;
-      });
-    },
-    [queryClient],
+      }),
+    [profileData],
   );
+
+  const cancelItem = useCallback(() => {
+    setEditing(null);
+  }, []);
 
   const saveItem = async (section, id, data) => {
     const endpoint = SECTION_ENDPOINT[section] || section;
@@ -103,33 +88,38 @@ export default function Profile({ toastTimer }) {
       if (id === "new") {
         response = await api.post(`/api/accounts/${endpoint}/`, data);
         const created = response.data;
-        setProfile((prev) => ({
-          ...prev,
-          [section]: [...(prev[section] || []), created],
-        }));
+        setProfile((prev) => {
+          const base = prev ?? profileData;
+          return {
+            ...base,
+            [section]: [...(base?.[section] || []), created],
+          };
+        });
       } else {
         response = await api.patch(`/api/accounts/${endpoint}/${id}/`, data);
         const updated = response.data;
-        setProfile((prev) => ({
-          ...prev,
-          [section]: (prev[section] || []).map((it) =>
-            String(it.id) === String(id) ? { ...it, ...updated } : it,
-          ),
-        }));
+        setProfile((prev) => {
+          const base = prev ?? profileData;
+          return {
+            ...base,
+            [section]: (base?.[section] || []).map((it) =>
+              String(it.id) === String(id) ? { ...it, ...updated } : it,
+            ),
+          };
+        });
       }
       setEditing(null);
       dispatch(showToast(toastTimer, "با موفقیت ذخیره شد۔"));
-      queryClient.invalidateQueries(["fetch_profile_data"]);
-      queryClient.invalidateQueries([`fetch_${endpoint}`]);
     } catch (error) {
       const isNetworkError = !error.response;
       if (isNetworkError) {
         setProfile((prev) => {
-          const list = prev[section] || [];
+          const base = prev ?? profileData;
+          const list = base?.[section] || [];
           if (id === "new")
-            return { ...prev, [section]: [...list, { ...data, id: uid() }] };
+            return { ...base, [section]: [...list, { ...data, id: uid() }] };
           return {
-            ...prev,
+            ...base,
             [section]: list.map((it) =>
               String(it.id) === String(id) ? { ...it, ...data } : it,
             ),
@@ -150,39 +140,31 @@ export default function Profile({ toastTimer }) {
   const removeItem = async (section, id) => {
     if (!window.confirm("آیا از حذف این مورد مطمئن هستید؟")) return;
     const endpoint = SECTION_ENDPOINT[section] || section;
-    const syncBackupDelete = () => {
-      if (backupRef.current?.[section]) {
-        backupRef.current = {
-          ...backupRef.current,
-          [section]: backupRef.current[section].filter(
+    try {
+      await api.delete(`/api/accounts/${endpoint}/${id}/`);
+      setProfile((prev) => {
+        const base = prev ?? profileData;
+        return {
+          ...base,
+          [section]: (base?.[section] || []).filter(
             (it) => String(it.id) !== String(id),
           ),
         };
-      }
-    };
-    try {
-      await api.delete(`/api/accounts/${endpoint}/${id}/`);
-      setProfile((prev) => ({
-        ...prev,
-        [section]: (prev[section] || []).filter(
-          (it) => String(it.id) !== String(id),
-        ),
-      }));
-      syncBackupDelete();
+      });
       setEditing(null);
       dispatch(showToast(toastTimer, "مورد موردنظر حذف شد۔"));
-      queryClient.invalidateQueries(["fetch_profile_data"]);
-      queryClient.invalidateQueries([`fetch_${endpoint}`]);
     } catch (error) {
       const isNetworkError = !error.response;
       if (isNetworkError) {
-        setProfile((prev) => ({
-          ...prev,
-          [section]: (prev[section] || []).filter(
-            (it) => String(it.id) !== String(id),
-          ),
-        }));
-        syncBackupDelete();
+        setProfile((prev) => {
+          const base = prev ?? profileData;
+          return {
+            ...base,
+            [section]: (base?.[section] || []).filter(
+              (it) => String(it.id) !== String(id),
+            ),
+          };
+        });
         setEditing(null);
         dispatch(showToast(toastTimer, "مورد موردنظر حذف شد (آفلاین)۔"));
         return;
@@ -208,8 +190,7 @@ export default function Profile({ toastTimer }) {
     if (!pr.fullName.trim()) e.fullName = "نام و نام خانوادگی الزامی است۔";
     else if (pr.fullName.trim().length < 3) e.fullName = "حداقل ۳ کاراکتر۔";
     else if (pr.fullName.trim().length > 60) e.fullName = "حداکثر ۶۰ کاراکتر۔";
-    if (!pr.title.trim()) e.title = "عنوان حرفه‌ای الزامی است۔";
-    else if (pr.title.length > 80) e.title = "حداکثر ۸۰ کاراکتر۔";
+    if (pr.title && pr.title.length > 80) e.title = "حداکثر ۸۰ کاراکتر۔";
     if (pr.university && pr.university.length > 80)
       e.university = "حداکثر ۸۰ کاراکتر۔";
     if (pr.field && pr.field.length > 80) e.field = "حداکثر ۸۰ کاراکتر۔";
@@ -256,6 +237,12 @@ export default function Profile({ toastTimer }) {
         e.phone =
           "شماره تماس باید ۱۱ رقم و با 09 شروع شود (مثال: 09123456789)۔";
     }
+    if (pr.email && String(pr.email).trim()) {
+      const email = String(pr.email).trim();
+      if (email.length > 254) e.email = "حداکثر ۲۵۴ کاراکتر۔";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+        e.email = "فرمت ایمیل معتبر نیست (مثال: example@mail.com)۔";
+    }
     if (pr.linkedin && pr.linkedin.length > 255)
       e.linkedin = "حداکثر ۲۵۵ کاراکتر۔";
     else if (pr.linkedin && !urlRe.test(pr.linkedin))
@@ -280,20 +267,18 @@ export default function Profile({ toastTimer }) {
       });
       const updated = response.data;
       if (updated) {
-        setProfile(clone(updated));
-        backupRef.current = clone(updated);
+        queryClient.setQueryData(["fetch_profile_data"], updated);
       }
+      setDraft(null);
       setEditMode(false);
       setEditing(null);
-      backupRef.current = null;
       dispatch(showToast(toastTimer, "تغییرات پروفایل با موفقیت ذخیره شد۔"));
       queryClient.invalidateQueries(["fetch_profile_data"]);
     } catch (error) {
       const isNetworkError = !error.response;
       if (isNetworkError) {
-        setEditMode(false);
+        setDraft(null);
         setEditing(null);
-        backupRef.current = null;
         dispatch(showToast(toastTimer, "تغییرات ذخیره شد (آفلاین)۔"));
         return;
       }
@@ -302,7 +287,17 @@ export default function Profile({ toastTimer }) {
   };
 
   const cancelProfile = () => {
-    backupRef.current = null;
+    if (editing) {
+      dispatch(
+        showToast(
+          toastTimer,
+          "لطفاً ابتدا فرم باز را تکمیل یا لغو کنید۔",
+          "error",
+        ),
+      );
+      return;
+    }
+    setDraft(null);
     setEditMode(false);
     setEditing(null);
     setPersonalErrors({});
@@ -314,42 +309,26 @@ export default function Profile({ toastTimer }) {
     !!editing && editing.section === section && editing.id === id;
   const startEdit = (section, id) => setEditing({ section, id });
 
-  useEffect(() => {
-    document.title =
-      (profile?.personal?.fullName || "پروفایل") + " | رزومهٔ دانشجویی";
-  }, [profile?.personal?.fullName]);
-
-  useEffect(() => {
-    if (!profileData) return;
-    try {
-      setProfile(clone(profileData));
-    } catch (e) {
-      void e;
-    }
-  }, [profileData]);
-
   if (isLoading1 || isLoading2 || !profileData || !profile) {
     return (
-      <div dir="rtl" className="app">
+      <div dir="rtl" className="app is-viewing">
         <ProfilePageSkeleton />
       </div>
     );
   }
 
   return (
-    <div dir="rtl" className="app">
+    <div dir="rtl" className={`app ${editMode ? "is-editing" : "is-viewing"}`}>
       <Header
         p={p}
         editMode={editMode}
         personalErrors={personalErrors}
         updatePersonal={updatePersonal}
         saveProfile={saveProfile}
-        clone={clone}
         toastTimer={toastTimer}
         profile={profile}
-        backupRef={backupRef}
         setPersonalErrors={setPersonalErrors}
-        setEditMode={setEditMode}
+        setEditMode={enterEditMode}
         cancelProfile={cancelProfile}
         editing={editing}
       />
@@ -364,20 +343,14 @@ export default function Profile({ toastTimer }) {
             personalErrors={personalErrors}
             toastTimer={toastTimer}
           />
-          {editMode ? (
-            <AccountSettings
-              p={p}
-              toastTimer={toastTimer}
-              onUsernameChanged={handleUsernameChanged}
-            />
-          ) : null}
+          {editMode ? <AccountSettings toastTimer={toastTimer} /> : null}
           <Languages
             profile={profile}
             isFormOpen={isFormOpen}
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             toastTimer={toastTimer}
           />
@@ -387,7 +360,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             toastTimer={toastTimer}
           />
@@ -397,11 +370,7 @@ export default function Profile({ toastTimer }) {
             setProfile={setProfile}
             toastTimer={toastTimer}
           />
-          <Contact
-            p={p}
-            setContactOpen={setContactOpen}
-            toastTimer={toastTimer}
-          />
+          <Contact p={p} />
         </aside>
 
         <main className="col" aria-label="محتوای اصلی رزومه">
@@ -418,7 +387,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             dateRange={dateRange}
             toastTimer={toastTimer}
@@ -429,7 +398,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             dateRange={dateRange}
             toastTimer={toastTimer}
@@ -440,7 +409,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             toastTimer={toastTimer}
           />
@@ -450,7 +419,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             dateRange={dateRange}
             toastTimer={toastTimer}
@@ -461,7 +430,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             toastTimer={toastTimer}
           />
@@ -471,7 +440,7 @@ export default function Profile({ toastTimer }) {
             editMode={editMode}
             startEdit={startEdit}
             saveItem={saveItem}
-            setEditing={setEditing}
+            cancelItem={cancelItem}
             removeItem={removeItem}
             toastTimer={toastTimer}
           />
@@ -483,13 +452,6 @@ export default function Profile({ toastTimer }) {
         saveProfile={saveProfile}
         cancelProfile={cancelProfile}
         editing={editing}
-      />
-      <ContactModal
-        open={contactOpen}
-        onClose={() => setContactOpen(false)}
-        showToast={showToast}
-        toastTimer={toastTimer}
-        isValidEmail={isValidEmail}
       />
     </div>
   );

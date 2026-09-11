@@ -13,7 +13,7 @@ export default function Projects({
   editMode,
   startEdit,
   saveItem,
-  setEditing,
+  cancelItem,
   removeItem,
   dateRange,
 }) {
@@ -34,7 +34,7 @@ export default function Projects({
                   <ProjectForm
                     initial={pr}
                     onSave={(d) => saveItem("projects", pr.id, d)}
-                    onCancel={() => setEditing(null)}
+                    onCancel={() => cancelItem("projects")}
                   />
                 </div>
               ) : (
@@ -134,7 +134,7 @@ export default function Projects({
           {isFormOpen("projects", "new") ? (
             <ProjectForm
               onSave={(d) => saveItem("projects", "new", d)}
-              onCancel={() => setEditing(null)}
+              onCancel={() => cancelItem("projects")}
             />
           ) : null}
           {editMode && !isFormOpen("projects", "new") ? (
