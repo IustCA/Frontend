@@ -329,4 +329,51 @@ export function ProfilePageSkeleton() {
   );
 }
 
+export function LoginPageSkeleton() {
+  return (
+    <div
+      dir="rtl"
+      className="login-wrap"
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label="در حال بارگذاری صفحه ورود"
+    >
+      <span className="sr-only">در حال بارگذاری صفحه ورود...</span>
+
+      <div className="login-card card animate-pulse" aria-hidden="true">
+        <div className="login-head">
+          <Skeleton className="w-14 h-14 rounded-[18px] bg-linear-to-br from-indigo-200 to-violet-200" />
+          <Skeleton className="h-5 w-32 rounded-lg mt-1.5" />
+          <Skeleton className="h-3.5 w-52 max-w-full rounded" />
+        </div>
+
+        <div className="flex flex-col">
+          <div className="field">
+            <Skeleton className="h-3 w-20 rounded mb-1.5" />
+            <Skeleton className="h-10.5 w-full rounded-xl" />
+          </div>
+
+          <div className="field">
+            <Skeleton className="h-3 w-20 rounded mb-1.5" />
+            <Skeleton className="h-10.5 w-full rounded-xl" />
+          </div>
+
+          <div className="field">
+            <Skeleton className="h-3 w-20 rounded mb-1.5" />
+            <div className="captcha-row">
+              <Skeleton className="flex-1 h-12 rounded-xl" />
+              <Skeleton className="w-9 h-9 rounded-[10px] shrink-0 self-center bg-white border border-gray-200" />
+            </div>
+            <Skeleton className="h-10.5 w-full rounded-xl" />
+          </div>
+
+          <Skeleton className="h-10.5 w-full rounded-xl bg-indigo-200/70 mt-1" />
+          <Skeleton className="h-3.5 w-40 rounded mx-auto mt-4" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default ProfilePageSkeleton;

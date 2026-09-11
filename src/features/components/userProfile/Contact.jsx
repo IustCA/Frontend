@@ -4,17 +4,6 @@ import SectionCard from "../common/SectionCard";
 export default function Contact({ p }) {
   return (
     <SectionCard icon="mail" title="اطلاعات تماس" titleId="contact-side-title">
-      {p.username ? (
-        <div className="info-row">
-          <span className="ic">
-            <Icon name="user" size={15} />
-          </span>
-          <div>
-            <span className="lbl">نام کاربری</span>
-            <span className="val ltr">{p.username}</span>
-          </div>
-        </div>
-      ) : null}
       {p.phone ? (
         <div className="info-row">
           <span className="ic">

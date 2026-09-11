@@ -61,7 +61,9 @@ export default function AccountSettings({ toastTimer }) {
         serverData?.new_password?.[0] ||
         serverData?.detail ||
         (typeof serverData === "object"
-          ? Object.values(serverData || {}).flat().join(" ")
+          ? Object.values(serverData || {})
+              .flat()
+              .join(" ")
           : "") ||
         "خطا در تغییر رمز عبور (رمز فعلی اشتباه است یا رمز جدید معتبر نیست)";
       setErrPass(msg);
@@ -84,7 +86,6 @@ export default function AccountSettings({ toastTimer }) {
           handlePassword();
         }}
       >
-        {/* تله autofill مرورگر: فوکوس مرورگر روی این‌ها می‌افتد نه فیلدهای اصلی */}
         <input
           type="text"
           name="fake-username-trap"

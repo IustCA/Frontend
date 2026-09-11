@@ -169,17 +169,6 @@ function PersonalInfo({ editMode, p, updatePersonal, personalErrors }) {
               </div>
             </div>
           ) : null}
-          {p.username ? (
-            <div className="info-row">
-              <span className="ic">
-                <Icon name="user" size={15} />
-              </span>
-              <div>
-                <span className="lbl">نام کاربری</span>
-                <span className="val ltr">{p.username}</span>
-              </div>
-            </div>
-          ) : null}
           {p.email ? (
             <div className="info-row">
               <span className="ic">

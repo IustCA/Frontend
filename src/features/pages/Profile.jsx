@@ -54,7 +54,6 @@ export default function Profile({ toastTimer }) {
   const [editing, setEditing] = useState(null);
   const [personalErrors, setPersonalErrors] = useState({});
 
-  // تک‌منبع حقیقت: خارج از ویرایش از کش سرور، داخل ویرایش از درفت محلی
   const profile = editMode ? (draft ?? profileData) : profileData;
   const setProfile = setDraft;
 
