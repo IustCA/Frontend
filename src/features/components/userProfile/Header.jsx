@@ -2,38 +2,70 @@ import { useDispatch } from "react-redux";
 import { useRef, useState } from "react";
 import Field from "../common/Field";
 import Icon from "../common/Icon";
+import { toEnglishDigits, toPersianDigits } from "../common/dateUtils";
 import { showToast } from "../../shared/AppSlice";
+import { getDefaultAvatar } from "../common/avatarUtils";
+import PersianDatePicker from "../common/PersianDatePicker";
+import CompletionRing from "./CompletionRing";
+import { toExternalUrl } from "../common/urlUtils";
 
-const IMG_AVATAR =
-  "https://image.qwenlm.ai/public_source/d4ae5256-6a4f-4e2a-b022-021cf3a0d064/14cd1e56b-e87c-4b3d-8281-bcbb64951014.png";
 const AVAILABILITY_OPTIONS = [
   "آماده همکاری",
   "آماده کارآموزی",
   "فقط پروژه‌های دانشجویی",
   "در حال حاضر در دسترس نیستم",
 ];
-const firstSentence = (text) => {
-  const t = String(text || "").trim();
-  const idx = t.indexOf("۔");
-  return idx > 0 ? t.slice(0, idx + 1) : t;
+
+const ROLE_LABELS = {
+  bachelor: "کارشناسی",
+  master: "کارشناسی ارشد",
+  phd: "دکتری",
+  alumni: "فارغ‌التحصیل",
+  faculty: "هیئت علمی / استاد",
+  other: "سایر",
 };
 
 export default function Header({
   p,
   editMode,
+  canEdit = true,
   personalErrors,
   updatePersonal,
-  saveProfile,
   toastTimer,
   profile,
   setPersonalErrors,
   setEditMode,
-  cancelProfile,
-  editing,
 }) {
   const dispatch = useDispatch();
   const avatarRef = useRef(null);
   const [avatarErr, setAvatarErr] = useState("");
+  const defaultAvatar = getDefaultAvatar(p.gender);
+
+  const handlePhoneChange = (e) => {
+    let v = toEnglishDigits(e.target.value).replace(/\D/g, "");
+    if (v.length > 11) v = v.slice(0, 11);
+    updatePersonal("phone", v);
+  };
+  const handlePhoneKeyDown = (e) => {
+    const allowed = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "End",
+    ];
+    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+    if (!/^\d$/.test(e.key)) e.preventDefault();
+  };
+  const handlePhonePaste = (e) => {
+    e.preventDefault();
+    const v = toEnglishDigits(e.clipboardData.getData("text"))
+      .replace(/\D/g, "")
+      .slice(0, 11);
+    updatePersonal("phone", v);
+  };
 
   const startEditProfile = () => {
     setPersonalErrors({});
@@ -121,6 +153,44 @@ export default function Header({
     }
   };
 
+  // سال ورود به دانشگاه
+  const entryYear = String(p.entryYear ?? "").trim();
+
+  const metaChips = (
+    <div className="meta-chips">
+      {p.university ? (
+        <span className="chip">
+          <Icon name="gradCap" size={14} />
+          {p.university}
+        </span>
+      ) : null}
+      {p.field ? (
+        <span className="chip">
+          <Icon name="book" size={14} />
+          {p.field}
+        </span>
+      ) : null}
+      {entryYear ? (
+        <span className="chip">
+          <Icon name="calendar" size={14} />
+          {`ورودی ${toPersianDigits(entryYear)}`}
+        </span>
+      ) : null}
+      {p.role ? (
+        <span className="chip">
+          <Icon name="badge" size={14} />
+          {ROLE_LABELS[p.role] || p.role}
+        </span>
+      ) : null}
+      {p.availability ? (
+        <span className="badge-avail">
+          <span className="dot" aria-hidden="true" />
+          {p.availability}
+        </span>
+      ) : null}
+    </div>
+  );
+
   return (
     <header className="card header-card">
       <div className="cover" aria-hidden="true" />
@@ -131,10 +201,10 @@ export default function Header({
               {(p.fullName || "؟").trim().charAt(0)}
             </span>
             <img
-              src={p.avatar || IMG_AVATAR}
+              src={p.avatar || defaultAvatar}
               alt={"تصویر پروفایل " + p.fullName}
               onError={(e) => {
-                e.target.src = IMG_AVATAR;
+                e.target.src = defaultAvatar;
               }}
             />
           </div>
@@ -186,6 +256,7 @@ export default function Header({
         <div className="header-info">
           {editMode ? (
             <div className="no-print">
+              <div className="sub-title">مشخصات</div>
               <div className="grid-2">
                 <Field
                   id="hd-name"
@@ -206,7 +277,7 @@ export default function Header({
                       "input" + (personalErrors.fullName ? " err" : "")
                     }
                     value={p.fullName}
-                    onChange={(e) => updatePersonal("fullName", e.target.value)}
+                    readOnly
                     maxLength={60}
                     placeholder="مثلاً علی رضایی"
                   />
@@ -252,9 +323,7 @@ export default function Header({
                       "input" + (personalErrors.university ? " err" : "")
                     }
                     value={p.university}
-                    onChange={(e) =>
-                      updatePersonal("university", e.target.value)
-                    }
+                    readOnly
                     maxLength={80}
                   />
                 </Field>
@@ -274,16 +343,16 @@ export default function Header({
                     id="hd-field"
                     className={"input" + (personalErrors.field ? " err" : "")}
                     value={p.field}
-                    onChange={(e) => updatePersonal("field", e.target.value)}
+                    readOnly
                     maxLength={80}
                   />
                 </Field>
               </div>
               <div className="grid-2">
                 <Field
-                  id="hd-sem"
-                  label="ترم تحصیلی"
-                  error={personalErrors.semester}
+                  id="hd-entryYear"
+                  label="سال ورود به دانشگاه"
+                  error={personalErrors.entryYear}
                 >
                   <input
                     autoCorrect="off"
@@ -292,22 +361,81 @@ export default function Header({
                     data-lpignore="true"
                     data-form-type="other"
                     autoComplete="off"
-                    name="hd-sem_no_autofill"
-                    id="hd-sem"
+                    name="hd-entryYear_no_autofill"
+                    id="hd-entryYear"
                     className={
-                      "input" + (personalErrors.semester ? " err" : "")
+                      "input" + (personalErrors.entryYear ? " err" : "")
                     }
-                    value={p.semester}
-                    onChange={(e) => updatePersonal("semester", e.target.value)}
-                    maxLength={20}
-                    placeholder="مثلاً ترم ۶"
+                    value={toPersianDigits(entryYear) || 1400}
+                    readOnly
+                    maxLength={4}
+                    inputMode="numeric"
+                    placeholder="مثلاً ۱۴۰۲"
                   />
                 </Field>
+                <Field id="hd-avail" label="وضعیت همکاری">
+                  <select
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
+                    autoComplete="off"
+                    id="hd-avail"
+                    className="input"
+                    value={p.availability}
+                    onChange={(e) =>
+                      updatePersonal("availability", e.target.value)
+                    }
+                  >
+                    {AVAILABILITY_OPTIONS.map((a) => (
+                      <option key={a} value={a}>
+                        {a}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+              <div className="sub-title">اطلاعات شخصی و تماس</div>
+              <PersianDatePicker
+                id="hd-birth"
+                label="تاریخ تولد"
+                value={p.birthDate}
+                onChange={(v) => updatePersonal("birthDate", v)}
+                mode="full"
+                error={personalErrors.birthDate}
+                maxToday
+              />
+              <div className="grid-2">
                 <Field
-                  id="hd-city"
-                  label="شهر محل سکونت"
-                  error={personalErrors.city}
+                  id="hd-phone"
+                  label="شمارهٔ تماس"
+                  error={personalErrors.phone}
                 >
+                  <input
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
+                    name="hd-phone_no_autofill"
+                    id="hd-phone"
+                    className={
+                      "input ltr" + (personalErrors.phone ? " err" : "")
+                    }
+                    value={p.phone}
+                    placeholder="09123456789"
+                    onChange={handlePhoneChange}
+                    onKeyDown={handlePhoneKeyDown}
+                    onPaste={handlePhonePaste}
+                    inputMode="numeric"
+                    pattern="09[0-9]{9}"
+                    maxLength={11}
+                    dir="ltr"
+                  />
+                </Field>
+                <Field id="hd-email" label="ایمیل" error={personalErrors.email}>
                   <input
                     autoCorrect="off"
                     autoCapitalize="off"
@@ -315,36 +443,122 @@ export default function Header({
                     data-lpignore="true"
                     data-form-type="other"
                     autoComplete="off"
-                    name="hd-city_no_autofill"
-                    id="hd-city"
-                    className={"input" + (personalErrors.city ? " err" : "")}
-                    value={p.city}
-                    onChange={(e) => updatePersonal("city", e.target.value)}
-                    maxLength={50}
+                    name="hd-email_no_autofill"
+                    id="hd-email"
+                    dir="ltr"
+                    type="email"
+                    className={
+                      "input ltr" + (personalErrors.email ? " err" : "")
+                    }
+                    value={p.email || ""}
+                    onChange={(e) => updatePersonal("email", e.target.value)}
+                    maxLength={254}
+                    placeholder="example@mail.com"
+                    inputMode="email"
                   />
                 </Field>
               </div>
-              <Field id="hd-avail" label="وضعیت همکاری">
-                <select
+              <div className="grid-2">
+                <Field
+                  id="hd-linkedin"
+                  label="لینکدین"
+                  error={personalErrors.linkedin}
+                >
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
+                    autoComplete="off"
+                    name="hd-linkedin_no_autofill"
+                    id="hd-linkedin"
+                    dir="ltr"
+                    className={
+                      "input" + (personalErrors.linkedin ? " err" : "")
+                    }
+                    value={p.linkedin}
+                    onChange={(e) => updatePersonal("linkedin", e.target.value)}
+                    maxLength={255}
+                    placeholder="https://linkedin.com/in/..."
+                  />
+                </Field>
+                <Field
+                  id="hd-github"
+                  label="گیت‌هاب"
+                  error={personalErrors.github}
+                >
+                  <input
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-lpignore="true"
+                    data-form-type="other"
+                    autoComplete="off"
+                    name="hd-github_no_autofill"
+                    id="hd-github"
+                    dir="ltr"
+                    className={"input" + (personalErrors.github ? " err" : "")}
+                    value={p.github}
+                    onChange={(e) => updatePersonal("github", e.target.value)}
+                    maxLength={255}
+                    placeholder="https://github.com/..."
+                  />
+                </Field>
+              </div>
+              <Field
+                id="hd-web"
+                label="وب‌سایت شخصی"
+                error={personalErrors.website}
+              >
+                <input
                   autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
                   data-lpignore="true"
                   data-form-type="other"
                   autoComplete="off"
-                  id="hd-avail"
-                  className="input"
-                  value={p.availability}
-                  onChange={(e) =>
-                    updatePersonal("availability", e.target.value)
-                  }
+                  name="hd-web_no_autofill"
+                  id="hd-web"
+                  dir="ltr"
+                  className={"input" + (personalErrors.website ? " err" : "")}
+                  value={p.website}
+                  placeholder="https://..."
+                  onChange={(e) => updatePersonal("website", e.target.value)}
+                  maxLength={255}
+                />
+              </Field>
+              <Field
+                id="hd-about"
+                label="درباره من"
+                required
+                error={personalErrors.about}
+              >
+                <textarea
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  autoComplete="off"
+                  name="hd-about_no_autofill"
+                  id="hd-about"
+                  className={"input" + (personalErrors.about ? " err" : "")}
+                  style={{ minHeight: 130 }}
+                  value={p.about}
+                  onChange={(e) => updatePersonal("about", e.target.value)}
+                  maxLength={1000}
+                  placeholder="حداکثر ۱۰۰۰ کاراکتر"
+                />
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "var(--muted)",
+                    textAlign: "left",
+                  }}
                 >
-                  {AVAILABILITY_OPTIONS.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
-                    </option>
-                  ))}
-                </select>
+                  {p.about.length}/۱۰۰۰
+                </div>
               </Field>
             </div>
           ) : (
@@ -354,79 +568,128 @@ export default function Header({
             </>
           )}
 
-          <div className="meta-chips">
-            {p.university ? (
-              <span className="chip">
-                <Icon name="gradCap" size={14} />
-                {p.university}
-              </span>
-            ) : null}
-            {p.field ? (
-              <span className="chip">
-                <Icon name="book" size={14} />
-                {p.field}
-              </span>
-            ) : null}
-            {p.semester ? (
-              <span className="chip">
-                <Icon name="star" size={14} />
-                {p.semester}
-              </span>
-            ) : null}
-            {p.city ? (
-              <span className="chip">
-                <Icon name="mapPin" size={14} />
-                {p.city}
-              </span>
-            ) : null}
-            {p.availability ? (
-              <span className="badge-avail">
-                <span className="dot" aria-hidden="true" />
-                {p.availability}
-              </span>
-            ) : null}
-          </div>
+          {editMode ? metaChips : null}
 
-          {!editMode && p.about.trim() ? (
-            <p className="header-intro">{firstSentence(p.about)}</p>
+          {!editMode ? (
+            <>
+              {p.about && p.about.trim() ? (
+                <p className="header-intro">{p.about}</p>
+              ) : null}
+
+              {p.birthDate ||
+              p.phone ||
+              p.email ||
+              p.linkedin ||
+              p.github ||
+              p.website ? (
+                <div className="header-contact">
+                  {p.birthDate ? (
+                    <div className="contact-item">
+                      <span className="ic">
+                        <Icon name="calendar" size={15} />
+                      </span>
+                      <div className="txt">
+                        <span className="lbl">تاریخ تولد</span>
+                        <span className="val">{p.birthDate}</span>
+                      </div>
+                    </div>
+                  ) : null}
+                  {p.phone ? (
+                    <div className="contact-item">
+                      <span className="ic">
+                        <Icon name="phone" size={15} />
+                      </span>
+                      <div className="txt">
+                        <span className="lbl">شمارهٔ تماس</span>
+                        <a className="val ltr" href={`tel:${p.phone}`}>
+                          {p.phone}
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                  {p.email ? (
+                    <div className="contact-item">
+                      <span className="ic">
+                        <Icon name="mail" size={15} />
+                      </span>
+                      <div className="txt">
+                        <span className="lbl">ایمیل</span>
+                        <a className="val ltr" href={`mailto:${p.email}`}>
+                          {p.email}
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                  {p.linkedin ? (
+                    <div className="contact-item">
+                      <span className="ic">
+                        <Icon name="linkedin" size={15} />
+                      </span>
+                      <div className="txt">
+                        <span className="lbl">لینکدین</span>
+                        <a
+                          className="val ltr"
+                          href={toExternalUrl(p.linkedin)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {p.linkedin}
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                  {p.github ? (
+                    <div className="contact-item">
+                      <span className="ic">
+                        <Icon name="github" size={15} />
+                      </span>
+                      <div className="txt">
+                        <span className="lbl">گیت‌هاب</span>
+                        <a
+                          className="val ltr"
+                          href={toExternalUrl(p.github)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {p.github}
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                  {p.website ? (
+                    <div className="contact-item">
+                      <span className="ic">
+                        <Icon name="globe" size={15} />
+                      </span>
+                      <div className="txt">
+                        <span className="lbl">وب‌سایت شخصی</span>
+                        <a
+                          className="val ltr"
+                          href={toExternalUrl(p.website)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {p.website}
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+              <div className="header-chips-sep">{metaChips}</div>
+            </>
           ) : null}
         </div>
 
-        <div className="header-actions no-print">
-          {editMode ? (
-            <>
-              <div className="btn-wrap">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={saveProfile}
-                  aria-disabled={!!editing}
-                  aria-describedby={editing ? "save-tip-header" : undefined}
-                >
-                  <Icon name="check" size={16} />
-                  ذخیره تغییرات
-                </button>
-                {editing ? (
-                  <span
-                    id="save-tip-header"
-                    className="quick-tooltip"
-                    role="tooltip"
-                  >
-                    ابتدا فرم باز را تکمیل یا لغو کنید
-                  </span>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={cancelProfile}
-              >
-                <Icon name="x" size={16} />
-                انصراف
-              </button>
-            </>
-          ) : (
-            <>
+        {editMode && canEdit ? (
+          <div className="header-actions no-print">
+            <CompletionRing profile={profile} />
+          </div>
+        ) : null}
+
+        {!editMode ? (
+          <div className="header-actions no-print">
+            {canEdit ? (
               <button
                 type="button"
                 className="btn btn-primary"
@@ -435,26 +698,29 @@ export default function Header({
                 <Icon name="pencil" size={16} />
                 ویرایش پروفایل
               </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => window.print()}
-              >
-                <Icon name="download" size={16} />
-                دانلود رزومه
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={shareProfile}
-                aria-label="اشتراک‌گذاری پروفایل"
-              >
-                <Icon name="share" size={16} />
-                اشتراک‌گذاری
-              </button>
-            </>
-          )}
-        </div>
+            ) : null}
+            {/* دانلود رزومه موقتاً غیرفعال شده است
+            <button
+              type="button"
+              className="btn btn-outline cursor-not-allowed"
+              onClick={() => window.print()}
+              disabled
+            >
+              <Icon name="download" size={16} />
+              دانلود رزومه
+            </button>
+            */}
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={shareProfile}
+              aria-label="اشتراک‌گذاری پروفایل"
+            >
+              <Icon name="share" size={16} />
+              اشتراک‌گذاری
+            </button>
+          </div>
+        ) : null}
       </div>
     </header>
   );

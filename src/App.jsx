@@ -11,6 +11,10 @@ import {
 
 const Login = lazy(() => import("./features/pages/Login.jsx"));
 const Profile = lazy(() => import("./features/pages/Profile.jsx"));
+const Search = lazy(() => import("./features/pages/Search.jsx"));
+const TeacherProfile = lazy(
+  () => import("./features/pages/TeacherProfile.jsx"),
+);
 
 export default function App() {
   const toastTimer = useRef(null);
@@ -38,6 +42,34 @@ export default function App() {
                   <Profile toastTimer={toastTimer} />
                 </Suspense>
               </RestrictedArea>
+            }
+          />
+          <Route
+            path="search"
+            element={
+              <RestrictedArea toastTimer={toastTimer}>
+                <Suspense fallback={<ProfilePageSkeleton />}>
+                  <Search toastTimer={toastTimer} />
+                </Suspense>
+              </RestrictedArea>
+            }
+          />
+          <Route
+            path="profile/:id"
+            element={
+              <RestrictedArea toastTimer={toastTimer}>
+                <Suspense fallback={<ProfilePageSkeleton />}>
+                  <Profile toastTimer={toastTimer} />
+                </Suspense>
+              </RestrictedArea>
+            }
+          />
+          <Route
+            path="teacherProfile"
+            element={
+              <Suspense fallback={<ProfilePageSkeleton />}>
+                <TeacherProfile />
+              </Suspense>
             }
           />
           <Route path="*" element={<Navigate to="/profile" replace />} />

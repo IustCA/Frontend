@@ -57,8 +57,6 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
       e.endDate = "تاریخ پایان نمی‌تواند قبل از شروع باشد۔";
     else if (!f.ongoing && f.endDate && isAfterTodayStr(f.endDate, "monthYear"))
       e.endDate = "تاریخ پایان نمی‌تواند بعد از امروز باشد۔";
-    if (f.github && !urlRe.test(f.github))
-      e.github = "لینک باید با https:// شروع شود۔";
     if (f.github && f.github.length > 255) e.github = "حداکثر ۲۵۵ کاراکتر۔";
     if (f.demo && !urlRe.test(f.demo))
       e.demo = "لینک باید با https:// شروع شود۔";

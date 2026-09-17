@@ -3,7 +3,8 @@ import api from "../api/axios";
 import { useDispatch } from "react-redux";
 import { showToast } from "../shared/AppSlice";
 
-export function useProfileData(toastTimer) {
+export function useProfileData(toastTimer, options = {}) {
+  const { enabled = true } = options;
   const dispatch = useDispatch();
 
   return useQuery({
@@ -22,6 +23,7 @@ export function useProfileData(toastTimer) {
         return null;
       }
     },
+    enabled,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

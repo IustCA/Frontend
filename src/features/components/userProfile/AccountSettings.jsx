@@ -26,6 +26,7 @@ export default function AccountSettings({ toastTimer }) {
   const [errPass, setErrPass] = useState("");
 
   const handlePassword = async () => {
+    if (loadingPass) return;
     setErrPass("");
     if (!oldPass || !newPass || !confirmPass) {
       setErrPass("همه فیلدهای رمز عبور الزامی است.");
@@ -203,7 +204,6 @@ export default function AccountSettings({ toastTimer }) {
         <button
           type="submit"
           className="btn btn-primary btn-sm"
-          onClick={handlePassword}
           disabled={loadingPass}
         >
           {loadingPass ? "..." : "تغییر رمز عبور"}

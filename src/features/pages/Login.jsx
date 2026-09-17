@@ -22,8 +22,8 @@ const toEnglishDigits = (value = "") =>
     .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 
 export default function Login({ toastTimer }) {
+  const [studentId, setStudentId] = useState("");
   const [nationalId, setNationalId] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaCode, setCaptchaCode] = useState(() => makeCaptcha());
   const [errors, setErrors] = useState({});
@@ -43,16 +43,16 @@ export default function Login({ toastTimer }) {
     e.preventDefault();
     setServerError("");
 
+    const sid = toEnglishDigits(studentId).trim();
     const nid = toEnglishDigits(nationalId).trim();
-    const phone = toEnglishDigits(phoneNumber).trim();
 
     const next = {};
+    if (!sid) next.studentId = "شماره دانشجویی را وارد کنید.";
+    else if (!/^\d+$/.test(sid))
+      next.studentId = "شماره دانشجویی باید فقط شامل عدد باشد.";
+    else if (sid.length > 11)
+      next.studentId = "شماره دانشجویی نمی‌تواند بیش از ۱۱ رقم باشد.";
     if (!nid) next.nationalId = "کد ملی را وارد کنید.";
-    else if (!/^\d{10}$/.test(nid))
-      next.nationalId = "کد ملی باید ۱۰ رقم باشد.";
-    if (!phone) next.phoneNumber = "شماره تماس را وارد کنید.";
-    else if (!/^09\d{9}$/.test(phone))
-      next.phoneNumber = "شماره تماس معتبر نیست (مثلاً 09123456789).";
     if (!captchaInput.trim()) next.captcha = "کد امنیتی را وارد کنید.";
     else if (captchaInput.trim().toUpperCase() !== captchaCode)
       next.captcha = "کد امنیتی نادرست است.";
@@ -65,8 +65,8 @@ export default function Login({ toastTimer }) {
     setIsSubmitting(true);
     try {
       const { data } = await api.post("/api/accounts/auth/login/", {
-        national_id: nid,
-        phone_number: phone,
+        username: sid,
+        password: nid,
       });
       setAuthTokens({ access: data?.access, refresh: data?.refresh });
       queryClient.removeQueries("fetch_user_info");
@@ -76,8 +76,10 @@ export default function Login({ toastTimer }) {
       const detail =
         error.response?.data?.detail ||
         error.response?.data?.non_field_errors?.[0] ||
+        error.response?.data?.username?.[0] ||
+        error.response?.data?.password?.[0] ||
         (error.message?.includes("Network Error")
-          ? "خطا در اتصال به سرور. مطمئن شوید بک‌اند روی آدرس VITE_API_BASE_URL در حال اجراست."
+          ? "خطا در اتصال به سرور"
           : "خطا در ورود. لطفا دوباره تلاش کنید.");
       setServerError(detail);
       dispatch(showToast(toastTimer, detail, "error"));
@@ -95,7 +97,7 @@ export default function Login({ toastTimer }) {
             <Icon name="gradCap" size={26} />
           </div>
           <h1>ورود به IustCA</h1>
-          <p>برای ادامه، کد ملی و شماره تماس خود را وارد کنید.</p>
+          <p>برای ادامه، شماره دانشجویی و کد ملی خود را وارد کنید.</p>
         </div>
 
         <form
@@ -130,8 +132,48 @@ export default function Login({ toastTimer }) {
             style={{ display: "none" }}
           />
           <Field
+            id="studentId"
+            label="شماره دانشجویی"
+            required
+            error={errors.studentId}
+          >
+            <div className="input-with-icon">
+              <span className="input-icon">
+                <Icon name="badge" size={17} />
+              </span>
+              <input
+                id="studentId"
+                name="studentId_no_autofill"
+                className={`input has-icon ltr ${errors.studentId ? "err" : ""}`}
+                type="text"
+                inputMode="numeric"
+                placeholder="مثلاً 400123456"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-bwignore="true"
+                data-form-type="other"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                readOnly
+                onFocus={(e) => {
+                  e.currentTarget.removeAttribute("readonly");
+                  e.currentTarget.readOnly = false;
+                }}
+                onClick={(e) => {
+                  e.currentTarget.removeAttribute("readonly");
+                  e.currentTarget.readOnly = false;
+                }}
+              />
+            </div>
+          </Field>
+
+          <Field
             id="nationalId"
-            label="کد ملی"
+            label="رمز عبور(کدملی)"
             required
             error={errors.nationalId}
           >
@@ -156,46 +198,6 @@ export default function Login({ toastTimer }) {
                 data-form-type="other"
                 value={nationalId}
                 onChange={(e) => setNationalId(e.target.value)}
-                readOnly
-                onFocus={(e) => {
-                  e.currentTarget.removeAttribute("readonly");
-                  e.currentTarget.readOnly = false;
-                }}
-                onClick={(e) => {
-                  e.currentTarget.removeAttribute("readonly");
-                  e.currentTarget.readOnly = false;
-                }}
-              />
-            </div>
-          </Field>
-
-          <Field
-            id="phoneNumber"
-            label="شماره تماس"
-            required
-            error={errors.phoneNumber}
-          >
-            <div className="input-with-icon">
-              <span className="input-icon">
-                <Icon name="phone" size={17} />
-              </span>
-              <input
-                id="phoneNumber"
-                name="phoneNumber_no_autofill"
-                className={`input has-icon ltr ${errors.phoneNumber ? "err" : ""}`}
-                type="tel"
-                inputMode="tel"
-                placeholder="مثلاً 09123456789"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                data-lpignore="true"
-                data-1p-ignore="true"
-                data-bwignore="true"
-                data-form-type="other"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
                 readOnly
                 onFocus={(e) => {
                   e.currentTarget.removeAttribute("readonly");

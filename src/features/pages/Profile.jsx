@@ -1,17 +1,14 @@
 import { useCallback, useState } from "react";
+import { Link, useParams } from "react-router";
 import { ProfilePageSkeleton } from "../shared/PageLoader.jsx";
 import { showToast } from "../shared/AppSlice";
 import { useDispatch } from "react-redux";
 import { useUserInfo } from "../hooks/useUserInfo";
 import Header from "../components/userProfile/Header.jsx";
-import CompletionProgress from "../components/userProfile/CompletionProgress.jsx";
-import PersonalInfo from "../components/userProfile/PersonalInfo.jsx";
 import AccountSettings from "../components/userProfile/AccountSettings.jsx";
 import Languages from "../components/userProfile/Languages.jsx";
 import Skills from "../components/userProfile/Skills.jsx";
 import Interests from "../components/userProfile/Interests.jsx";
-import Contact from "../components/userProfile/Contact.jsx";
-import About from "../components/userProfile/About.jsx";
 import EducationalBackground from "../components/userProfile/EducationalBackground.jsx";
 import JobExperience from "../components/userProfile/JobExperience.jsx";
 import UniversityActivities from "../components/userProfile/UniversityActivities.jsx";
@@ -20,6 +17,7 @@ import Certificates from "../components/userProfile/Certificates.jsx";
 import Achievements from "../components/userProfile/Achievements.jsx";
 import EditModeBar from "../components/userProfile/EditModeBar.jsx";
 import { useProfileData } from "../hooks/useProfileData.jsx";
+import { usePublicProfile } from "../hooks/usePublicProfile.jsx";
 import { useQueryClient } from "react-query";
 import api from "../api/axios";
 import { toEnglishDigits } from "../components/common/dateUtils";
@@ -45,19 +43,34 @@ const dateRange = (start, end, ongoing) => {
 
 export default function Profile({ toastTimer }) {
   const dispatch = useDispatch();
-  const { isLoading: isLoading1 } = useUserInfo(toastTimer);
-  const { data: profileData, isLoading: isLoading2 } =
-    useProfileData(toastTimer);
+  const { id: routeId } = useParams();
+  const viewId = routeId ? String(routeId) : null;
+  const isOwner = !viewId;
+  const { isLoading: isLoading1 } = useUserInfo(toastTimer, {
+    enabled: isOwner,
+  });
+  const { data: fetchedProfile, isLoading: isLoading2 } = useProfileData(
+    toastTimer,
+    { enabled: isOwner },
+  );
+  const { data: publicProfile, isLoading: isLoadingPublic } = usePublicProfile(
+    toastTimer,
+    viewId,
+    { enabled: !isOwner },
+  );
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editing, setEditing] = useState(null);
   const [personalErrors, setPersonalErrors] = useState({});
 
+  const profileData = isOwner ? fetchedProfile : publicProfile;
+
   const profile = editMode ? (draft ?? profileData) : profileData;
   const setProfile = setDraft;
 
   const enterEditMode = () => {
+    if (!isOwner) return;
     setPersonalErrors({});
     setDraft(profileData);
     setEditMode(true);
@@ -193,9 +206,36 @@ export default function Profile({ toastTimer }) {
     if (pr.university && pr.university.length > 80)
       e.university = "حداکثر ۸۰ کاراکتر۔";
     if (pr.field && pr.field.length > 80) e.field = "حداکثر ۸۰ کاراکتر۔";
-    if (pr.semester && pr.semester.length > 20)
-      e.semester = "حداکثر ۲۰ کاراکتر۔";
-    if (pr.city && pr.city.length > 50) e.city = "حداکثر ۵۰ کاراکتر۔";
+    // سال ورود به دانشگاه (جایگزین ترم تحصیلی) — اختیاری، ولی اگر پر شد باید سال شمسی معتبر باشد
+    {
+      const rawYear = toEnglishDigits(
+        String(pr.entryYear ?? "").trim(),
+      ).replace(/\D/g, "");
+      if (String(pr.entryYear ?? "").trim() && !/^\d{4}$/.test(rawYear)) {
+        e.entryYear = "سال ورود باید ۴ رقم باشد (مثلاً ۱۴۰۲)۔";
+      } else if (rawYear) {
+        const y = Number(rawYear);
+        let currentJy = 1405;
+        try {
+          const fmtJy = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+            year: "numeric",
+          });
+          const jyParts = fmtJy.formatToParts(new Date());
+          const jyVal = Number(
+            toEnglishDigits(
+              jyParts.find((p) => p.type === "year")?.value || "0",
+            ),
+          );
+          if (jyVal > 1300 && jyVal < 1500) currentJy = jyVal;
+        } catch {
+          /* fallback 1405 */
+        }
+        if (y < 1370 || y > 1500)
+          e.entryYear = "سال ورود معتبر نیست (مثلاً بین ۱۳۷۰ تا امسال)۔";
+        else if (y > currentJy)
+          e.entryYear = "سال ورود نمی‌تواند از سال جاری بیشتر باشد۔";
+      }
+    }
     const normalizeFa = (s) => toEnglishDigits(String(s || "").trim());
     if (
       pr.birthDate &&
@@ -244,11 +284,7 @@ export default function Profile({ toastTimer }) {
     }
     if (pr.linkedin && pr.linkedin.length > 255)
       e.linkedin = "حداکثر ۲۵۵ کاراکتر۔";
-    else if (pr.linkedin && !urlRe.test(pr.linkedin))
-      e.linkedin = "لینک باید با http:// یا https:// شروع شود۔";
     if (pr.github && pr.github.length > 255) e.github = "حداکثر ۲۵۵ کاراکتر۔";
-    else if (pr.github && !urlRe.test(pr.github))
-      e.github = "لینک باید با http:// یا https:// شروع شود۔";
     if (pr.website && pr.website.length > 255)
       e.website = "حداکثر ۲۵۵ کاراکتر۔";
     else if (pr.website && !urlRe.test(pr.website))
@@ -260,8 +296,15 @@ export default function Profile({ toastTimer }) {
       return;
     }
     try {
+      const entryYear = toEnglishDigits(
+        String(profile.personal.entryYear ?? "").trim(),
+      ).replace(/\D/g, "");
+      const personalPayload = {
+        ...profile.personal,
+        entryYear,
+      };
       const response = await api.patch("/api/accounts/profile/", {
-        personal: profile.personal,
+        personal: personalPayload,
         interests: profile.interests,
       });
       const updated = response.data;
@@ -308,10 +351,32 @@ export default function Profile({ toastTimer }) {
     !!editing && editing.section === section && editing.id === id;
   const startEdit = (section, id) => setEditing({ section, id });
 
-  if (isLoading1 || isLoading2 || !profileData || !profile) {
+  const isLoading =
+    (isOwner && (isLoading1 || isLoading2)) || (!isOwner && isLoadingPublic);
+
+  if (isLoading) {
     return (
       <div dir="rtl" className="app is-viewing">
         <ProfilePageSkeleton />
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div dir="rtl" className="app is-viewing">
+        <div className="empty">
+          <p>
+            {viewId
+              ? "کاربری با این شناسه پیدا نشد."
+              : "خطا در دریافت اطلاعات پروفایل."}
+          </p>
+          {viewId ? (
+            <Link to="/search" className="btn btn-outline btn-sm">
+              بازگشت به جستجو
+            </Link>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -321,29 +386,18 @@ export default function Profile({ toastTimer }) {
       <Header
         p={p}
         editMode={editMode}
+        canEdit={isOwner}
         personalErrors={personalErrors}
         updatePersonal={updatePersonal}
-        saveProfile={saveProfile}
         toastTimer={toastTimer}
         profile={profile}
         setPersonalErrors={setPersonalErrors}
         setEditMode={enterEditMode}
-        cancelProfile={cancelProfile}
-        editing={editing}
       />
 
       <div className="layout">
         <aside className="col" aria-label="اطلاعات جانبی">
-          <CompletionProgress profile={profile} />
-          <PersonalInfo
-            editMode={editMode}
-            p={p}
-            updatePersonal={updatePersonal}
-            personalErrors={personalErrors}
-            toastTimer={toastTimer}
-          />
-          {editMode ? <AccountSettings toastTimer={toastTimer} /> : null}
-          <Languages
+          <Skills
             profile={profile}
             isFormOpen={isFormOpen}
             editMode={editMode}
@@ -353,7 +407,7 @@ export default function Profile({ toastTimer }) {
             removeItem={removeItem}
             toastTimer={toastTimer}
           />
-          <Skills
+          <Languages
             profile={profile}
             isFormOpen={isFormOpen}
             editMode={editMode}
@@ -369,18 +423,11 @@ export default function Profile({ toastTimer }) {
             setProfile={setProfile}
             toastTimer={toastTimer}
           />
-          <Contact p={p} />
+          {editMode ? <AccountSettings toastTimer={toastTimer} /> : null}
         </aside>
 
         <main className="col" aria-label="محتوای اصلی رزومه">
-          <About
-            editMode={editMode}
-            p={p}
-            updatePersonal={updatePersonal}
-            personalErrors={personalErrors}
-            toastTimer={toastTimer}
-          />
-          <EducationalBackground
+          <JobExperience
             profile={profile}
             isFormOpen={isFormOpen}
             editMode={editMode}
@@ -391,7 +438,7 @@ export default function Profile({ toastTimer }) {
             dateRange={dateRange}
             toastTimer={toastTimer}
           />
-          <JobExperience
+          <EducationalBackground
             profile={profile}
             isFormOpen={isFormOpen}
             editMode={editMode}

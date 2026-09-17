@@ -3,6 +3,7 @@ import EmptyState from "../common/EmptyState";
 import Icon from "../common/Icon";
 import SectionCard from "../common/SectionCard";
 import ProjectForm from "./ProjectForm";
+import { toExternalUrl } from "../common/urlUtils";
 
 const IMG_MOBILE =
   "https://image.qwenlm.ai/public_source/d4ae5256-6a4f-4e2a-b022-021cf3a0d064/191181357-05ef-41dc-a7ed-8875a3431772.png";
@@ -106,7 +107,7 @@ export default function Projects({
                       {pr.demo ? (
                         <a
                           className="btn btn-primary btn-sm"
-                          href={pr.demo}
+                          href={toExternalUrl(pr.demo)}
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -117,7 +118,7 @@ export default function Projects({
                       {pr.github ? (
                         <a
                           className="btn btn-outline btn-sm"
-                          href={pr.github}
+                          href={toExternalUrl(pr.github)}
                           target="_blank"
                           rel="noreferrer"
                         >
