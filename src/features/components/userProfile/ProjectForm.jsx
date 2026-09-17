@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Field from "../common/Field";
+import SelectWithOther from "../common/SelectWithOther";
 import TagInput from "../common/TagInput";
 import FormActions from "../common/FormActions";
 import PersianDatePicker from "../common/PersianDatePicker";
@@ -42,6 +43,7 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
     if (!f.description.trim()) e.description = "توضیح کوتاه پروژه الزامی است۔";
     else if (f.description.trim().length > 800)
       e.description = "حداکثر ۸۰۰ کاراکتر۔";
+    if (!f.category.trim()) e.category = "دسته‌بندی پروژه را مشخص کنید۔";
     if (!f.startDate.trim()) e.startDate = "تاریخ شروع الزامی است۔";
     else if (!/^\d{4}\/\d{1,2}$/.test(nf(f.startDate)))
       e.startDate = "فرمت باید YYYY/MM باشد۔";
@@ -103,26 +105,15 @@ export default function ProjectForm({ initial, onSave, onCancel }) {
         />
       </Field>
       <div className="grid-2">
-        <Field id="pr-cat" label="دسته‌بندی">
-          <select
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            data-lpignore="true"
-            data-form-type="other"
-            autoComplete="off"
-            id="pr-cat"
-            className="input"
-            value={f.category}
-            onChange={(e) => setF({ ...f, category: e.target.value })}
-          >
-            {PROJECT_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectWithOther
+          id="pr-cat"
+          label="دسته‌بندی"
+          value={f.category}
+          onChange={(v) => setF({ ...f, category: v })}
+          options={PROJECT_CATEGORIES}
+          placeholder="دسته‌بندی پروژه را وارد کنید"
+          error={errs.category}
+        />
         <Field id="pr-team" label="وضعیت انجام">
           <select
             autoCorrect="off"

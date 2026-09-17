@@ -396,37 +396,7 @@ export default function Profile({ toastTimer }) {
       />
 
       <div className="layout">
-        <aside className="col" aria-label="اطلاعات جانبی">
-          <Skills
-            profile={profile}
-            isFormOpen={isFormOpen}
-            editMode={editMode}
-            startEdit={startEdit}
-            saveItem={saveItem}
-            cancelItem={cancelItem}
-            removeItem={removeItem}
-            toastTimer={toastTimer}
-          />
-          <Languages
-            profile={profile}
-            isFormOpen={isFormOpen}
-            editMode={editMode}
-            startEdit={startEdit}
-            saveItem={saveItem}
-            cancelItem={cancelItem}
-            removeItem={removeItem}
-            toastTimer={toastTimer}
-          />
-          <Interests
-            profile={profile}
-            editMode={editMode}
-            setProfile={setProfile}
-            toastTimer={toastTimer}
-          />
-          {editMode ? <AccountSettings toastTimer={toastTimer} /> : null}
-        </aside>
-
-        <main className="col" aria-label="محتوای اصلی رزومه">
+        <main className="col col-main" aria-label="محتوای اصلی رزومه">
           <JobExperience
             profile={profile}
             isFormOpen={isFormOpen}
@@ -436,6 +406,16 @@ export default function Profile({ toastTimer }) {
             cancelItem={cancelItem}
             removeItem={removeItem}
             dateRange={dateRange}
+            toastTimer={toastTimer}
+          />
+          <Skills
+            profile={profile}
+            isFormOpen={isFormOpen}
+            editMode={editMode}
+            startEdit={startEdit}
+            saveItem={saveItem}
+            cancelItem={cancelItem}
+            removeItem={removeItem}
             toastTimer={toastTimer}
           />
           <EducationalBackground
@@ -491,6 +471,26 @@ export default function Profile({ toastTimer }) {
             toastTimer={toastTimer}
           />
         </main>
+
+        <aside className="col col-side" aria-label="اطلاعات جانبی">
+          <Languages
+            profile={profile}
+            isFormOpen={isFormOpen}
+            editMode={editMode}
+            startEdit={startEdit}
+            saveItem={saveItem}
+            cancelItem={cancelItem}
+            removeItem={removeItem}
+            toastTimer={toastTimer}
+          />
+          <Interests
+            profile={profile}
+            editMode={editMode}
+            setProfile={setProfile}
+            toastTimer={toastTimer}
+          />
+          {editMode ? <AccountSettings toastTimer={toastTimer} /> : null}
+        </aside>
       </div>
 
       <EditModeBar

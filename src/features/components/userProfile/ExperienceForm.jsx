@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Field from "../common/Field";
+import SelectWithOther from "../common/SelectWithOther";
 import TagInput from "../common/TagInput";
 import FormActions from "../common/FormActions";
 import PersianDatePicker from "../common/PersianDatePicker";
@@ -42,6 +43,7 @@ export default function ExperienceForm({ initial, onSave, onCancel }) {
     else if (f.jobTitle.trim().length > 200) e.jobTitle = "حداکثر ۲۰۰ کاراکتر۔";
     if (!f.company.trim()) e.company = "نام شرکت یا سازمان الزامی است۔";
     else if (f.company.trim().length > 200) e.company = "حداکثر ۲۰۰ کاراکتر۔";
+    if (!f.type.trim()) e.type = "نوع همکاری را مشخص کنید۔";
     if (!f.startDate.trim()) e.startDate = "تاریخ شروع الزامی است۔";
     else if (!/^\d{4}\/\d{1,2}$/.test(nf(f.startDate)))
       e.startDate = "فرمت باید YYYY/MM باشد۔";
@@ -111,26 +113,15 @@ export default function ExperienceForm({ initial, onSave, onCancel }) {
         </Field>
       </div>
       <div className="grid-2">
-        <Field id="ex-type" label="نوع همکاری">
-          <select
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            data-lpignore="true"
-            data-form-type="other"
-            autoComplete="off"
-            id="ex-type"
-            className="input"
-            value={f.type}
-            onChange={(e) => setF({ ...f, type: e.target.value })}
-          >
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectWithOther
+          id="ex-type"
+          label="نوع همکاری"
+          value={f.type}
+          onChange={(v) => setF({ ...f, type: v })}
+          options={EMPLOYMENT_TYPES}
+          placeholder="نوع همکاری را وارد کنید"
+          error={errs.type}
+        />
         <Field id="ex-loc" label="محل کار" error={errs.location}>
           <input
             autoCorrect="off"

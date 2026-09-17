@@ -180,7 +180,11 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        <Link className="navbar-brand" aria-label="IustCA - صفحه اصلی">
+        <Link
+          to="/profile"
+          className="navbar-brand"
+          aria-label="IustCA - صفحه اصلی"
+        >
           <span className="navbar-logo">
             <Icon name="gradCap" size={22} />
           </span>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Field from "../common/Field";
+import SelectWithOther from "../common/SelectWithOther";
 import FormActions from "../common/FormActions";
 import PersianDatePicker from "../common/PersianDatePicker";
 import { isAfterTodayStr } from "../common/dateUtils";
@@ -21,6 +22,7 @@ export default function AchievementForm({ initial, onSave, onCancel }) {
       : { title: "", type: ACHIEVEMENT_TYPES[0], date: "", description: "" },
   );
   const [err, setErr] = useState("");
+  const [errType, setErrType] = useState("");
   const [errDate, setErrDate] = useState("");
   const [errDesc, setErrDesc] = useState("");
   const submit = () => {
@@ -30,6 +32,10 @@ export default function AchievementForm({ initial, onSave, onCancel }) {
     }
     if (f.title.trim().length > 255) {
       setErr("حداکثر ۲۵۵ کاراکتر۔");
+      return;
+    }
+    if (!f.type.trim()) {
+      setErrType("نوع دستاورد را مشخص کنید۔");
       return;
     }
     const nf = (s) =>
@@ -74,26 +80,18 @@ export default function AchievementForm({ initial, onSave, onCancel }) {
         />
       </Field>
       <div className="grid-2">
-        <Field id="ah-type" label="نوع دستاورد">
-          <select
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            data-lpignore="true"
-            data-form-type="other"
-            autoComplete="off"
-            id="ah-type"
-            className="input"
-            value={f.type}
-            onChange={(e) => setF({ ...f, type: e.target.value })}
-          >
-            {ACHIEVEMENT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectWithOther
+          id="ah-type"
+          label="نوع دستاورد"
+          value={f.type}
+          onChange={(v) => {
+            setF({ ...f, type: v });
+            setErrType("");
+          }}
+          options={ACHIEVEMENT_TYPES}
+          placeholder="نوع دستاورد را وارد کنید"
+          error={errType}
+        />
         <PersianDatePicker
           id="ah-date"
           label="تاریخ"

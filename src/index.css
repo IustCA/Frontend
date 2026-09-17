@@ -456,6 +456,14 @@ p {
   gap: 22px;
   min-width: 0;
 }
+.layout > .col-main {
+  grid-column: 2;
+  grid-row: 1;
+}
+.layout > .col-side {
+  grid-column: 1;
+  grid-row: 1;
+}
 .card {
   background: var(--card);
   border: 1px solid var(--line);
@@ -1099,6 +1107,11 @@ textarea.input {
   .layout {
     grid-template-columns: 1fr;
   }
+  .layout > .col-main,
+  .layout > .col-side {
+    grid-column: 1;
+    grid-row: auto;
+  }
   .header-actions {
     margin-inline-start: 0;
     width: 100%;
@@ -1117,7 +1130,18 @@ textarea.input {
   }
   .avatar-wrap {
     margin-top: -44px;
-    width: 96px;
+    width: auto;
+    max-width: 100%;
+  }
+  .avatar-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+    justify-content: center;
+  }
+  .avatar-actions .btn {
+    width: auto;
+    white-space: nowrap;
   }
   .header-info h1 {
     font-size: 21px;
@@ -1129,10 +1153,12 @@ textarea.input {
     padding: 18px;
   }
   .header-actions .btn {
-    flex: 1;
+    flex: 1 1 auto;
+    white-space: nowrap;
+    padding-inline: 12px;
   }
   .header-actions .btn-wrap {
-    flex: 1;
+    flex: 1 1 auto;
   }
   .header-actions .btn-wrap .btn {
     width: 100%;
@@ -1150,6 +1176,11 @@ textarea.input {
   }
   .layout {
     grid-template-columns: 1fr;
+  }
+  .layout > .col-main,
+  .layout > .col-side {
+    grid-column: 1;
+    grid-row: auto;
   }
   .card {
     box-shadow: none;

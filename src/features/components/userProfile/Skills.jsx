@@ -26,6 +26,19 @@ export default function Skills({
   cancelItem,
   removeItem,
 }) {
+  const skillGroups = [
+    ...SKILL_CATEGORIES.map((cat) => ({
+      title: cat,
+      items: profile.skills.filter((s) => s.category === cat),
+    })),
+    {
+      title: "سایر",
+      items: profile.skills.filter(
+        (s) => !SKILL_CATEGORIES.includes(s.category),
+      ),
+    },
+  ].filter((group) => group.items.length > 0);
+
   return (
     <SectionCard icon="sparkles" title="مهارت‌ها" titleId="skills-title">
       {profile.skills.length === 0 && !isFormOpen("skills", "new") ? (
@@ -36,12 +49,10 @@ export default function Skills({
         />
       ) : (
         <>
-          {SKILL_CATEGORIES.map((cat) => {
-            const items = profile.skills.filter((s) => s.category === cat);
-            if (!items.length) return null;
+          {skillGroups.map(({ title, items }) => {
             return (
-              <div key={cat}>
-                <h3 className="sub-title">{cat}</h3>
+              <div key={title}>
+                <h3 className="sub-title">{title}</h3>
                 <div className="stack" style={{ gap: 4 }}>
                   {items.map((s) =>
                     isFormOpen("skills", s.id) ? (

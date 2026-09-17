@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Field from "../common/Field";
+import SelectWithOther from "../common/SelectWithOther";
 import FormActions from "../common/FormActions";
 
 const LEVELS = ["مقدماتی", "متوسط", "پیشرفته", "حرفه‌ای"];
@@ -16,6 +17,7 @@ export default function SkillForm({
       : { name: "", level: "متوسط", category: SKILL_CATEGORIES[0] },
   );
   const [err, setErr] = useState("");
+  const [catErr, setCatErr] = useState("");
   const submit = () => {
     const name = f.name.trim();
     if (!name) {
@@ -28,6 +30,10 @@ export default function SkillForm({
     }
     if (name.length < 2) {
       setErr("حداقل ۲ کاراکتر۔");
+      return;
+    }
+    if (!f.category.trim()) {
+      setCatErr("دسته‌بندی مهارت را مشخص کنید۔");
       return;
     }
     onSave({ ...f, name });
@@ -75,26 +81,18 @@ export default function SkillForm({
             ))}
           </select>
         </Field>
-        <Field id="skill-cat" label="دسته‌بندی">
-          <select
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            data-lpignore="true"
-            data-form-type="other"
-            autoComplete="off"
-            id="skill-cat"
-            className="input"
-            value={f.category}
-            onChange={(e) => setF({ ...f, category: e.target.value })}
-          >
-            {SKILL_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectWithOther
+          id="skill-cat"
+          label="دسته‌بندی"
+          value={f.category}
+          onChange={(v) => {
+            setF({ ...f, category: v });
+            setCatErr("");
+          }}
+          options={SKILL_CATEGORIES}
+          placeholder="دسته‌بندی مهارت را وارد کنید"
+          error={catErr}
+        />
       </div>
       <FormActions onSave={submit} onCancel={onCancel} />
     </div>
